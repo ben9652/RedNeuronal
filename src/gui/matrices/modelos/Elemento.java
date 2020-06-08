@@ -40,6 +40,10 @@ public class Elemento<Tipo> {
     public Tipo getElemento() {
         return elemento;
     }
+    
+    public void setElemento(Tipo elemento) {
+        this.elemento = elemento;
+    }
 
     /**
      * @return the abajo

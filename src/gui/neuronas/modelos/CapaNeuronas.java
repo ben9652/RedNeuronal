@@ -7,6 +7,8 @@ package gui.neuronas.modelos;
 
 import gui.funciones.modelos.Sigmoidea;
 import gui.interfaces.IFuncionActivacion;
+import gui.matrices.modelos.Matriz;
+import gui.numeros.modelos.Peso;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +20,7 @@ public abstract class CapaNeuronas {
     private int numeroCapa;
     protected int numeroDeNeuronasEnCapa;
     protected List<Neurona> neuronas;
+    protected Matriz<Peso> matrizPesos;
     protected IFuncionActivacion funcionAct;
     protected CapaNeuronas capaAnterior;
     protected CapaNeuronas capaSiguiente;
@@ -28,6 +31,7 @@ public abstract class CapaNeuronas {
     public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas){
         this.numeroDeNeuronasEnCapa = numeroNeuronas;
         this.neuronas = new ArrayList<>(numeroNeuronas);
+        this.matrizPesos = new Matriz();
         this.funcionAct = iaf;
         this.numeroEntradas = numeroEntradas;
         this.entrada = new ArrayList<>(numeroEntradas);
@@ -61,7 +65,7 @@ public abstract class CapaNeuronas {
                     this.neuronas.add(new Neurona(this.numeroEntradas, this.funcionAct));
                 }
                 
-                this.neuronas.get(i).inicializar();
+                this.neuronas.get(i).inicializar(this.matrizPesos);
             }
         }
         else {

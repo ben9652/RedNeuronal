@@ -7,6 +7,8 @@ package gui.neuronas.modelos;
 
 import gui.interfaces.IFuncionActivacion;
 import gui.interfaces.INeurona;
+import gui.matrices.modelos.Matriz;
+import gui.numeros.modelos.Peso;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,7 +18,7 @@ import java.util.Random;
  * @author Benjamin
  */
 public class Neurona implements INeurona {
-    private List<Double> pesos;
+    private List<Peso> pesos;
     private List<Double> entrada;
     private Double salida;
     private Double salidaAntesDeActivacion;
@@ -32,18 +34,21 @@ public class Neurona implements INeurona {
     }
 
     @Override
-    public void inicializar() {
+    public void inicializar(Matriz<Peso> matrizPesos) {
         Random random = new Random();
         
+        List<Peso> pesosHaciaNeurona = new ArrayList<>();
         for(int i = 0 ; i < this.numeroEntradas ; i++) {
-            double nuevoPeso = random.nextDouble();
+            Peso nuevoPeso = new Peso(random.nextDouble());
             try {
                 this.pesos.set(i, nuevoPeso);
             }
             catch(IndexOutOfBoundsException iobe) {
                 this.pesos.add(nuevoPeso);
             }
+            pesosHaciaNeurona.add(nuevoPeso);
         }
+        matrizPesos.addRow(pesosHaciaNeurona);
     }
     
     /**
@@ -59,7 +64,7 @@ public class Neurona implements INeurona {
             if(!esEntrada) {
                 if(this.entrada != null && this.pesos != null) {
                     for(int i = 0 ; i < this.numeroEntradas ; i++)
-                        this.salidaAntesDeActivacion += this.entrada.get(i) * this.pesos.get(i);
+                        this.salidaAntesDeActivacion += this.entrada.get(i) * this.pesos.get(i).getPeso();
                     this.salidaAntesDeActivacion += this.bias;
                 }
                 this.salida = this.funcionActivacion.calc(this.salidaAntesDeActivacion);
@@ -72,20 +77,6 @@ public class Neurona implements INeurona {
                 this.salida = this.funcionActivacion.calc(this.salidaAntesDeActivacion);
             }
         }
-    }
-
-    /**
-     * @return the pesos
-     */
-    public List<Double> getPesos() {
-        return pesos;
-    }
-
-    /**
-     * @param pesos the pesos to set
-     */
-    public void setPesos(List<Double> pesos) {
-        this.pesos = pesos;
     }
 
     /**

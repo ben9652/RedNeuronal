@@ -7,6 +7,7 @@ package gui.matrices.modelos;
 
 import gui.interfaces.IMatriz;
 import static gui.interfaces.IMatriz.ERROR_SIZE_FILA;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,14 +23,100 @@ public class Matriz<Tipo> implements IMatriz {
     private Integer filas;
     private Integer columnas;
     
+    public Matriz(Tipo[][] matriz) {
+        this.filas = 0;
+        this.columnas = 0;
+        for(Tipo[] i : matriz)
+            System.out.println(addRow(i));
+    }
+    
     public Matriz(int filas, int columnas){
+        this.filas = filas;
+        this.columnas = columnas;
         for(int i = 0 ; i < filas ; i++) 
-            addRow(new ArrayList<>(columnas));
+            System.out.println(addRow(new ArrayList<>(columnas)));
     }
 
     public Matriz() {
         this.filas = 0;
         this.columnas = 0;
+    }
+    
+    /**
+     * Se realiza el producto de la matriz que llama al método con el argumento
+     * del mismo.
+     * @param mat1
+     * @param mat2
+     * @return La matriz producto.
+     */
+    public static Matriz<Number> producto(Matriz<Number> mat1, Matriz<Number> mat2) {
+        try {
+            if(!mat1.columnas.equals(mat2.filas)) throw new DimensionesIncompatibles(ERROR_PRODUCTO);
+        }
+        catch(DimensionesIncompatibles di) {
+            System.out.println(di.getMessage());
+            return null;
+        }
+        
+        List<Number> fila_a_agregar = new ArrayList<>();
+        Matriz<Number> matrizProducto = new Matriz<>();
+        Elemento<Number> primerElementoFila = mat1.primero;
+        Elemento<Number> primerElementoColumna = mat2.primero;
+        Elemento<Number> indiceMat1;
+        Elemento<Number> indiceMat2;
+        
+        for(int indiceFila = 0 ; indiceFila < mat1.filas ; indiceFila++) {
+            for(int indiceColumna = 0 ; indiceColumna < mat2.columnas ; indiceColumna++) {
+                Number numero = 0;
+                indiceMat1 = primerElementoFila;
+                indiceMat2 = primerElementoColumna;
+                while(indiceMat2 != null) {
+                    //Hago el equivalente a numero += indiceMat1.getElemento() * indiceMat2.getElemento()
+                    numero = new BigDecimal(numero.toString()).add(new BigDecimal(indiceMat1.getElemento().toString()).multiply(new BigDecimal(indiceMat2.getElemento().toString())));
+                    indiceMat1 = indiceMat1.getDerecha();
+                    indiceMat2 = indiceMat2.getAbajo();
+                }
+                fila_a_agregar.add(numero);
+                primerElementoColumna = primerElementoColumna.getDerecha();
+            }
+            matrizProducto.addRow(fila_a_agregar);
+            fila_a_agregar.clear();
+            primerElementoFila = primerElementoFila.getAbajo();
+            primerElementoColumna = mat2.primero;
+        }
+        
+        System.out.println(EXITO_PRODUCTO);
+        return matrizProducto;
+    }
+    
+    public static Matriz<Number> suma(Matriz<Number> mat1, Matriz<Number> mat2) {
+        try {
+            if(!mat1.filas.equals(mat2.filas) || !mat1.columnas.equals(mat2.columnas)) throw new DimensionesIncompatibles(ERROR_SUMA);
+        }
+        catch(DimensionesIncompatibles di) {
+            System.out.println(di.getMessage());
+            return null;
+        }
+        
+        Matriz<Number> matrizSuma = new Matriz<>();
+        
+        for(Elemento<Number> primerElementoFila1 = mat1.primero, primerElementoFila2 = mat2.primero;
+            primerElementoFila1 != null || primerElementoFila2 != null;
+            primerElementoFila1 = primerElementoFila1.getAbajo(), primerElementoFila2 = primerElementoFila2.getAbajo()) {
+            
+            List<Number> filaNumeros = new ArrayList<>();
+            for(Elemento<Number> indiceMat1 = primerElementoFila1, indiceMat2 = primerElementoFila2;
+                indiceMat1 != null || indiceMat2 != null;
+                indiceMat1 = indiceMat1.getDerecha(), indiceMat2 = indiceMat2.getDerecha()) {
+                
+                Number numero = new BigDecimal(indiceMat1.getElemento().toString()).add(new BigDecimal(indiceMat2.getElemento().toString()));
+                filaNumeros.add(numero);
+            }
+            
+            matrizSuma.addRow(filaNumeros);
+        }
+        
+        return matrizSuma;
     }
     
     public final String addRow(List<Tipo> fila){
@@ -42,8 +129,33 @@ public class Matriz<Tipo> implements IMatriz {
         }
         else{
             if(fila.size() != this.columnas) return ERROR_SIZE_FILA;
-            for(Tipo t : fila){
-                if(t.equals(fila.get(0)))
+            Tipo t;
+            for(int i = 0 ; i < fila.size() ; i++) {
+                t = fila.get(i);
+                if(i == 0)
+                    actual = addElementDown(new Elemento(t), actual);
+                else
+                    actual = addElementRight(new Elemento(t), actual);
+            }
+        }
+        this.filas++;
+        return EXITO_AGREGADO_FILA;
+    }
+    
+    public final String addRow(Tipo[] fila) {
+        Elemento<Tipo> actual = this.primero;
+        if(this.filas < 1) {
+            for(Tipo t : fila) {
+                actual = addElementRight(new Elemento(t), actual);
+                this.columnas++;
+            }
+        }
+        else {
+            if(fila.length != this.columnas) return ERROR_SIZE_FILA;
+            Tipo t;
+            for(int i = 0 ; i < fila.length ; i++) {
+                t = fila[i];
+                if(i == 0)
                     actual = addElementDown(new Elemento(t), actual);
                 else
                     actual = addElementRight(new Elemento(t), actual);
@@ -83,7 +195,13 @@ public class Matriz<Tipo> implements IMatriz {
      * @return
      */
     public Elemento<Tipo> getElemento(int fila, int columna) {
-        if((fila < 0 || fila >= this.filas-1) && (columna < 0 || columna >= this.columnas-1)) throw new IndiceFueraDeRango("El índice ingresado está fuera de la dimensión de la matriz");
+        try {
+            if((fila < 0 || fila > this.filas-1) && (columna < 0 || columna > this.columnas-1)) throw new IndiceFueraDeRango("El índice ingresado está fuera de la dimensión de la matriz.");
+        }
+        catch(IndiceFueraDeRango ifdg) {
+            System.out.println(ifdg.getMessage());
+            return null;
+        }
         
         Elemento<Tipo> elementoBuscado;
         if(this.filas.intValue() == this.columnas.intValue() || this.filas > this.columnas) {
@@ -236,5 +354,13 @@ public class Matriz<Tipo> implements IMatriz {
     private Elemento<Tipo> finalAbajo(Elemento<Tipo> elemento){
         for( ; elemento.getAbajo() != null ; elemento = elemento.getAbajo());
         return elemento;
+    }
+    
+    public void print() {
+        for(int i = 0 ; i < this.filas ; i++) {
+            for(int j = 0 ; j < this.columnas ; j++) 
+                System.out.print(this.getElemento(i, j).getElemento() + "\t\t");
+            System.out.println("\n");
+        }
     }
 }
