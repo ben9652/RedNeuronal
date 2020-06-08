@@ -20,4 +20,8 @@ public class Tanh implements IFuncionActivacion {
     public double calc(double x) {
         return Math.tanh(this.a * x);
     }
+    
+    public double derivada(double x) {
+        return 1 / Math.pow(Math.cosh(this.a * x), 2);
+    }
 }

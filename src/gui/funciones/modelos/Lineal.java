@@ -20,4 +20,8 @@ public class Lineal implements IFuncionActivacion {
     public double calc(double x) {
         return Math.max(0.0, this.a * x);
     }
+    
+    public double derivada(double x) {
+        return x >= 0 ? 1.0 : 0.0;
+    }
 }

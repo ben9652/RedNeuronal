@@ -20,4 +20,8 @@ public class Sigmoidea implements IFuncionActivacion {
     public double calc(double x){
         return 1.0 / (1.0 + Math.exp(-a*x));
     }
+    
+    public double derivada(double x) {
+        return Math.exp(-a*x) / Math.pow(1 + Math.exp(-a*x), 2);
+    }
 }
