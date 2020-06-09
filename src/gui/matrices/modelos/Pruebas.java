@@ -55,10 +55,9 @@ public class Pruebas {
         Matriz<Number> matrizSuma = Matriz.suma(matriz3, matriz4);
         elapsedTime = System.nanoTime() - startTime;
         
-        matrizSuma.getElemento(1, 1).set
-        
         matrizSuma.print();
         System.out.println("\n\nTiempo transcurrido en la suma de matrices: " + elapsedTime);
+        
 //        Integer a = 9;
 //        Integer b = 5;
 //        Integer c = 1;

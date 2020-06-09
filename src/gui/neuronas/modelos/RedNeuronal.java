@@ -8,6 +8,7 @@
 package gui.neuronas.modelos;
 
 import gui.interfaces.IFuncionActivacion;
+import gui.matrices.modelos.Matriz;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,6 +100,22 @@ public class RedNeuronal {
         for(CapaOculta aux : this.capasOcultas) {
             System.out.println("\t--------Capa oculta " + i + ": " + aux.getNumeroDeNeuronasEnCapa() + " neuronas");
             i++;
+        }
+    }
+    
+    public void printMatricesPesos() {
+        for(CapaNeuronas capa = (CapaEntrada)this.capaEntrada ; capa != null ; capa = capa.getCapaSiguiente()) {
+            try {
+                Number[][] matrizNumeros = new Number[capa.matrizPesos.getFilas()][capa.matrizPesos.getColumnas()];
+                for(int i = 0 ; i < capa.matrizPesos.getFilas() ; i++) {
+                    for(int j = 0 ; j < capa.matrizPesos.getColumnas() ; j++)
+                        matrizNumeros[i][j] = capa.matrizPesos.getElemento(i, j).getElemento().getPeso();
+                }
+                Matriz<Number> matriz = new Matriz(matrizNumeros);
+                System.out.println("\n");
+                matriz.print();
+            }
+            catch(NullPointerException ipe) {}
         }
     }
     

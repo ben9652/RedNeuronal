@@ -42,6 +42,14 @@ public class Matriz<Tipo> implements IMatriz {
         this.columnas = 0;
     }
     
+    public Integer getFilas() {
+        return this.filas;
+    }
+    
+    public Integer getColumnas() {
+        return this.columnas;
+    }
+    
     /**
      * Se realiza el producto de la matriz que llama al método con el argumento
      * del mismo.
@@ -354,6 +362,16 @@ public class Matriz<Tipo> implements IMatriz {
     private Elemento<Tipo> finalAbajo(Elemento<Tipo> elemento){
         for( ; elemento.getAbajo() != null ; elemento = elemento.getAbajo());
         return elemento;
+    }
+    
+    public static Number[][] toArray(Matriz<Number> matriz) {
+        Number[][] array = new Number[matriz.filas][matriz.columnas];
+        for(int i = 0 ; i < matriz.filas ; i++) {
+            for(int j = 0 ; j < matriz.columnas ; j++) {
+                array[i][j] = matriz.getElemento(i, j).getElemento();
+            }
+        }
+        return array;
     }
     
     public void print() {

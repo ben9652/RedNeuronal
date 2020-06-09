@@ -57,6 +57,8 @@ public class Pruebas {
         salidaNeuronal = redN.getSalida();
         
         redN.salidas();
+        
+        redN.printMatricesPesos();
     }
     
     public static List<Double> toList(Double[] coleccion){
