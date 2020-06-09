@@ -34,26 +34,28 @@ public class Pruebas {
         System.out.println("¡Red Neuronal creada!");
         redN.print();
         
-        Double[] entradaNeuronal = {1.5, 0.5};
+        Double[] entradaNeuronal = {0.0, 1.0};
         List<Double> salidaNeuronal = new ArrayList<>();
         
         System.out.println("Feeding the values [" + String.valueOf(entradaNeuronal[0]) + " ; " +
                             String.valueOf(entradaNeuronal[1]) + "] to the neural network");
         
         redN.setEntrada(toList(entradaNeuronal));
-        redN.calculosInternos();
+        Double[] salidaDeseada = {1.0};
+        redN.calculoActivaciones(salidaDeseada);
         salidaNeuronal = redN.getSalida();
         
         redN.salidas();
         
         entradaNeuronal[0] = 1.0;
-        entradaNeuronal[1] = 2.1;
+        entradaNeuronal[1] = 1.0;
         
         System.out.println("Feeding the values [" + String.valueOf(entradaNeuronal[0]) + " ; " +
                             String.valueOf(entradaNeuronal[1]) + "] to the neural network");
         
         redN.setEntrada(toList(entradaNeuronal));
-        redN.calculosInternos();
+        salidaDeseada[0] = 0.0;
+        redN.calculoActivaciones(salidaDeseada);
         salidaNeuronal = redN.getSalida();
         
         redN.salidas();

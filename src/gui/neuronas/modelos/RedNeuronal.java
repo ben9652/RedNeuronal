@@ -9,8 +9,8 @@ package gui.neuronas.modelos;
 
 import gui.interfaces.IFuncionActivacion;
 import gui.matrices.modelos.Matriz;
-import gui.matrices.modelos.Vector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,6 +27,7 @@ public class RedNeuronal {
     private int numeroSalidas;
     protected List<Double> entrada;
     protected List<Double> salida;
+    private List<Double> salidaDeseada;
     
     public RedNeuronal(int numeroEntradas, 
                        int numeroSalidas, 
@@ -36,6 +37,7 @@ public class RedNeuronal {
         this.capasOcultas = new ArrayList<>();
         this.entrada = new ArrayList<>(numeroEntradas);
         this.salida = new ArrayList<>(numeroSalidas);
+        this.salidaDeseada = new ArrayList<>(numeroSalidas);
         
         this.numeroEntradas = numeroEntradas;
         addCapa(new CapaEntrada(numeroEntradas));
@@ -76,20 +78,22 @@ public class RedNeuronal {
     
     /**
      * Se inicializan los datos en la capa de entrada
+     * @param salidaDeseada
      */
-    public void calculosInternos() {
-        this.capaEntrada.setEntrada(new Vector(this.entrada));
-        this.capaEntrada.calculosInternos(true);
+    public void calculoActivaciones(Double[] salidaDeseada) {
+        this.salidaDeseada.addAll(Arrays.asList(salidaDeseada));
+        this.capaEntrada.setEntrada(this.entrada);
+        this.capaEntrada.calculoSalida(true);
         
         for(int i = 0 ; i < this.numeroCapasOcultas ; i++) {
             CapaOculta hl = this.capasOcultas.get(i);
             hl.setEntrada(hl.getCapaAnterior().getSalida());
-            hl.calculosInternos(false);
+            hl.calculoSalida(false);
         }
         
         this.capaSalida.setEntrada(this.capaSalida.getCapaAnterior().getSalida());
-        this.capaSalida.calculosInternos(false);
-        this.salida = this.capaSalida.getSalida().toListTipo();
+        this.capaSalida.calculoSalida(false);
+        this.salida = this.capaSalida.getSalida();
     }
     
     public void print(){

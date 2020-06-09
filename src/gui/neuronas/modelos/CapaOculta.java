@@ -18,12 +18,7 @@ public class CapaOculta extends CapaNeuronas {
     }
     
     @Override
-    public void inicializar(boolean esEntrada) {
-        super.inicializar(esEntrada);
-    }
-    
-    @Override
-    public void calculosInternos(boolean esEntrada) {
-        super.calculosInternos(esEntrada);
+    public void calculoSalida(boolean esEntrada) {
+        super.calculoSalida(esEntrada);
     }
 }

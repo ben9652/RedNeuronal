@@ -57,7 +57,7 @@ public class Matriz<Tipo> implements IMatriz {
      * @param mat2
      * @return La matriz producto.
      */
-    public static Matriz<Number> producto(Matriz<Number> mat1, Matriz<Number> mat2) {
+    public static Matriz<Double> producto(Matriz<Double> mat1, Matriz<Double> mat2) {
         try {
             if(!mat1.columnas.equals(mat2.filas)) throw new DimensionesIncompatibles(ERROR_PRODUCTO);
         }
@@ -66,21 +66,20 @@ public class Matriz<Tipo> implements IMatriz {
             return null;
         }
         
-        List<Number> fila_a_agregar = new ArrayList<>();
-        Matriz<Number> matrizProducto = new Matriz<>();
-        Elemento<Number> primerElementoFila = mat1.primero;
-        Elemento<Number> primerElementoColumna = mat2.primero;
-        Elemento<Number> indiceMat1;
-        Elemento<Number> indiceMat2;
+        List<Double> fila_a_agregar = new ArrayList<>();
+        Matriz<Double> matrizProducto = new Matriz<>();
+        Elemento<Double> primerElementoFila = mat1.primero;
+        Elemento<Double> primerElementoColumna = mat2.primero;
+        Elemento<Double> indiceMat1;
+        Elemento<Double> indiceMat2;
         
         for(int indiceFila = 0 ; indiceFila < mat1.filas ; indiceFila++) {
             for(int indiceColumna = 0 ; indiceColumna < mat2.columnas ; indiceColumna++) {
-                Number numero = 0;
+                Double numero = 0.0;
                 indiceMat1 = primerElementoFila;
                 indiceMat2 = primerElementoColumna;
                 while(indiceMat2 != null) {
-                    //Hago el equivalente a numero += indiceMat1.getElemento() * indiceMat2.getElemento()
-                    numero = new BigDecimal(numero.toString()).add(new BigDecimal(indiceMat1.getElemento().toString()).multiply(new BigDecimal(indiceMat2.getElemento().toString())));
+                    numero += indiceMat1.getElemento() * indiceMat2.getElemento();
                     indiceMat1 = indiceMat1.getDerecha();
                     indiceMat2 = indiceMat2.getAbajo();
                 }
@@ -97,7 +96,39 @@ public class Matriz<Tipo> implements IMatriz {
         return matrizProducto;
     }
     
-    public static Matriz<Number> suma(Matriz<Number> mat1, Matriz<Number> mat2) {
+    public static Vector<Double> producto(Matriz<Double> matriz, Vector<Double> vector) {
+        try {
+            if(!matriz.columnas.equals(vector.filas)) throw new DimensionesIncompatibles(ERROR_PRODUCTO);
+        }
+        catch(DimensionesIncompatibles di) {
+            System.out.println(di.getMessage());
+            return null;
+        }
+        
+        Vector<Double> vectorProducto = new Vector<>();
+        Elemento<Double> primerElementoFila = matriz.primero;
+        Elemento<Double> primerElementoColumna = vector.primero;
+        Elemento<Double> indiceMat1;
+        Elemento<Double> indiceMat2;
+        
+        for(int indiceFila = 0 ; indiceFila < matriz.filas ; indiceFila++) {
+            Double numero = 0.0;
+            indiceMat1 = primerElementoFila;
+            indiceMat2 = primerElementoColumna;
+            while(indiceMat2 != null) {
+                numero += indiceMat1.getElemento() * indiceMat2.getElemento();
+                indiceMat1 = indiceMat1.getDerecha();
+                indiceMat2 = indiceMat2.getAbajo();
+            }
+            vectorProducto.addRow(numero);
+            primerElementoFila = primerElementoFila.getAbajo();
+        }
+        
+        System.out.println(EXITO_PRODUCTO);
+        return vectorProducto;
+    }
+    
+    public static Matriz<Double> suma(Matriz<Double> mat1, Matriz<Double> mat2) {
         try {
             if(!mat1.filas.equals(mat2.filas) || !mat1.columnas.equals(mat2.columnas)) throw new DimensionesIncompatibles(ERROR_SUMA);
         }
@@ -106,18 +137,18 @@ public class Matriz<Tipo> implements IMatriz {
             return null;
         }
         
-        Matriz<Number> matrizSuma = new Matriz<>();
+        Matriz<Double> matrizSuma = new Matriz<>();
         
-        for(Elemento<Number> primerElementoFila1 = mat1.primero, primerElementoFila2 = mat2.primero;
+        for(Elemento<Double> primerElementoFila1 = mat1.primero, primerElementoFila2 = mat2.primero;
             primerElementoFila1 != null || primerElementoFila2 != null;
             primerElementoFila1 = primerElementoFila1.getAbajo(), primerElementoFila2 = primerElementoFila2.getAbajo()) {
             
-            List<Number> filaNumeros = new ArrayList<>();
-            for(Elemento<Number> indiceMat1 = primerElementoFila1, indiceMat2 = primerElementoFila2;
+            List<Double> filaNumeros = new ArrayList<>();
+            for(Elemento<Double> indiceMat1 = primerElementoFila1, indiceMat2 = primerElementoFila2;
                 indiceMat1 != null || indiceMat2 != null;
                 indiceMat1 = indiceMat1.getDerecha(), indiceMat2 = indiceMat2.getDerecha()) {
                 
-                Number numero = new BigDecimal(indiceMat1.getElemento().toString()).add(new BigDecimal(indiceMat2.getElemento().toString()));
+                Double numero = indiceMat1.getElemento() + indiceMat2.getElemento();
                 filaNumeros.add(numero);
             }
             
@@ -388,8 +419,8 @@ public class Matriz<Tipo> implements IMatriz {
         return elemento;
     }
     
-    public static Number[][] toArray(Matriz<Number> matriz) {
-        Number[][] array = new Number[matriz.filas][matriz.columnas];
+    public static Double[][] toArray(Matriz<Double> matriz) {
+        Double[][] array = new Double[matriz.filas][matriz.columnas];
         for(int i = 0 ; i < matriz.filas ; i++) {
             for(int j = 0 ; j < matriz.columnas ; j++) {
                 array[i][j] = matriz.getElemento(i, j).getElemento();

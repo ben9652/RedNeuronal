@@ -5,7 +5,7 @@
  */
 package gui.neuronas.modelos;
 
-import gui.matrices.modelos.Vector;
+import java.util.List;
 
 /**
  *
@@ -18,17 +18,12 @@ public class CapaEntrada extends CapaNeuronas {
     }
     
     @Override
-    public void inicializar(boolean esEntrada) {
-        super.inicializar(esEntrada);
+    public void calculoSalida(boolean esEntrada) {
+        super.calculoSalida(esEntrada);
     }
     
     @Override
-    public void calculosInternos(boolean esEntrada) {
-        super.calculosInternos(esEntrada);
-    }
-    
-    @Override
-    public void setEntrada(Vector<Double> entrada) {
+    public void setEntrada(List<Double> entrada) {
         super.setEntrada(entrada);
 //        
 //        int indice = 0;

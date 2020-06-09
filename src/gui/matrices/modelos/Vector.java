@@ -29,6 +29,26 @@ public class Vector<Tipo> extends Matriz<Tipo> {
             this.addRow(t);
     }
     
+    public static Vector<Double> suma(Vector<Double> v1, Vector<Double> v2) {
+        try {
+            if(!v1.filas.equals(v2.filas)) throw new DimensionesIncompatibles(ERROR_SUMA);
+        }
+        catch(DimensionesIncompatibles di) {
+            System.out.println(di.getMessage());
+            return null;
+        }
+        
+        Vector<Double> vectorSuma = new Vector();
+        
+        Elemento<Double> indiceV1 = v1.primero;
+        Elemento<Double> indiceV2 = v2.primero;
+        
+        for(int i = 0 ; i < v1.size() ; i++, indiceV1 = indiceV1.getAbajo(), indiceV2 = indiceV2.getAbajo())
+            vectorSuma.addRow(indiceV1.getElemento() + indiceV2.getElemento());
+        
+        return vectorSuma;
+    }
+    
     public final String addRow(Tipo elemento) {
         Elemento<Tipo> actual = super.primero;
         if(super.filas < 1) {
@@ -73,5 +93,9 @@ public class Vector<Tipo> extends Matriz<Tipo> {
     
     public Elemento<Tipo> getElemento(int posicion) {
         return super.getElemento(posicion, 0);
+    }
+    
+    public int size() {
+        return super.getFilas();
     }
 }

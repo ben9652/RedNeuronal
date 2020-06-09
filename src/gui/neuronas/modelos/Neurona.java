@@ -23,7 +23,7 @@ public class Neurona implements INeurona {
     private Double salida;
     private Double salidaAntesDeActivacion;
     private int numeroEntradas = 0;
-    private Double bias = -1.0;
+    private Double bias;
     private IFuncionActivacion funcionActivacion;
 
     Neurona(int numeroDeEntradas, IFuncionActivacion iaf) {
@@ -49,6 +49,8 @@ public class Neurona implements INeurona {
             pesosHaciaNeurona.add(new Elemento(nuevoPeso));
         }
         matrizPesos.addRowElements(pesosHaciaNeurona);
+        
+        this.bias = -1.0;
     }
     
     /**

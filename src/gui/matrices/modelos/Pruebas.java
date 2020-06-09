@@ -13,7 +13,7 @@ import java.util.List;
  * @author Benjamin
  */
 public class Pruebas {
-    public static void main(String[] args) {
+    public static void main(String[] args) {        
 //        Number[][] a = {
 //            {9, 5, 1},
 //            {0, 7, 8},
@@ -40,33 +40,42 @@ public class Pruebas {
 //            {1, 1, 1},
 //            {1, 1, 1},
 //        };
-//        Matriz<Number> matriz1 = new Matriz(a);
-//        Matriz<Number> matriz2 = new Matriz(b);
+//        
+//        Matriz<Double> matriz1 = new Matriz(numberToDouble(a));
+//        Matriz<Double> matriz2 = new Matriz(numberToDouble(b));
 //        long startTime = System.nanoTime();
-//        Matriz<Number> matrizProducto = Matriz.producto(matriz1, matriz2);
+//        Matriz<Double> matrizProducto = Matriz.producto(matriz1, matriz2);
 //        long elapsedTime = System.nanoTime() - startTime;
 //        
 //        matrizProducto.print();
 //        System.out.println("\n\nTiempo transcurrido en el producto de matrices: " + elapsedTime + "\n\n");
 //        
-//        Matriz<Number> matriz3 = new Matriz(c);
-//        Matriz<Number> matriz4 = new Matriz(d);
+//        Matriz<Double> matriz3 = new Matriz(numberToDouble(c));
+//        Matriz<Double> matriz4 = new Matriz(numberToDouble(d));
 //        startTime = System.nanoTime();
-//        Matriz<Number> matrizSuma = Matriz.suma(matriz3, matriz4);
+//        Matriz<Double> matrizSuma = Matriz.suma(matriz3, matriz4);
 //        elapsedTime = System.nanoTime() - startTime;
 //        
 //        matrizSuma.print();
 //        System.out.println("\n\nTiempo transcurrido en la suma de matrices: " + elapsedTime);
-
-        Elemento<Double> a = new Elemento(2);
-        Elemento<Double> b = new Elemento(5);
-        Elemento<Double> c = new Elemento(1);
+//
+        Double[] e = {2.0, 5.0, 1.0};
+        Double[] f = {5.0, 6.0, 2.0};
         
-        Vector<Double> vector = new Vector();
-        vector.addRowElement(a);
-        vector.addRowElement(b);
-        vector.addRowElement(c);
+        Vector<Double> vector1 = new Vector(e);
+        Vector<Double> vector2 = new Vector(f);
         
-        a.setElemento(Double.valueOf(6));
+        Vector.suma(vector1, vector2).print();
+    }
+    
+    public static Double[][] numberToDouble(Number[][] n) {
+        Double[][] numeros = new Double[n.length][n[0].length];
+        
+        for(int i = 0 ; i < n.length ; i++) {
+            for(int j = 0 ; j < n[0].length ; j++) {
+                numeros[i][j] = n[i][j].doubleValue();
+            }
+        }
+        return numeros;
     }
 }
