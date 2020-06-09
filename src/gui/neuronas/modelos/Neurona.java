@@ -7,8 +7,8 @@ package gui.neuronas.modelos;
 
 import gui.interfaces.IFuncionActivacion;
 import gui.interfaces.INeurona;
+import gui.matrices.modelos.Elemento;
 import gui.matrices.modelos.Matriz;
-import gui.numeros.modelos.Peso;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,8 +18,8 @@ import java.util.Random;
  * @author Benjamin
  */
 public class Neurona implements INeurona {
-    private List<Peso> pesos;
-    private List<Double> entrada;
+    private List<Elemento<Double>> pesos;
+    private List<Elemento<Double>> entrada;
     private Double salida;
     private Double salidaAntesDeActivacion;
     private int numeroEntradas = 0;
@@ -34,21 +34,21 @@ public class Neurona implements INeurona {
     }
 
     @Override
-    public void inicializar(Matriz<Peso> matrizPesos) {
+    public void inicializar(Matriz<Double> matrizPesos) {
         Random random = new Random();
         
-        List<Peso> pesosHaciaNeurona = new ArrayList<>();
+        List<Elemento<Double>> pesosHaciaNeurona = new ArrayList<>();
         for(int i = 0 ; i < this.numeroEntradas ; i++) {
-            Peso nuevoPeso = new Peso(random.nextDouble());
+            Double nuevoPeso = random.nextDouble();
             try {
-                this.pesos.set(i, nuevoPeso);
+                this.pesos.set(i, new Elemento(nuevoPeso));
             }
             catch(IndexOutOfBoundsException iobe) {
-                this.pesos.add(nuevoPeso);
+                this.pesos.add(new Elemento(nuevoPeso));
             }
-            pesosHaciaNeurona.add(nuevoPeso);
+            pesosHaciaNeurona.add(new Elemento(nuevoPeso));
         }
-        matrizPesos.addRow(pesosHaciaNeurona);
+        matrizPesos.addRowElements(pesosHaciaNeurona);
     }
     
     /**
@@ -64,7 +64,7 @@ public class Neurona implements INeurona {
             if(!esEntrada) {
                 if(this.entrada != null && this.pesos != null) {
                     for(int i = 0 ; i < this.numeroEntradas ; i++)
-                        this.salidaAntesDeActivacion += this.entrada.get(i) * this.pesos.get(i).getPeso();
+                        this.salidaAntesDeActivacion += this.entrada.get(i).getElemento() * this.pesos.get(i).getElemento();
                     this.salidaAntesDeActivacion += this.bias;
                 }
                 this.salida = this.funcionActivacion.calc(this.salidaAntesDeActivacion);
@@ -72,7 +72,7 @@ public class Neurona implements INeurona {
             else {
                 if(this.entrada != null) {
                     for(int i = 0 ; i < this.numeroEntradas ; i++)
-                        this.salidaAntesDeActivacion += this.entrada.get(i);
+                        this.salidaAntesDeActivacion += this.entrada.get(i).getElemento();
                 }
                 this.salida = this.funcionActivacion.calc(this.salidaAntesDeActivacion);
             }
@@ -82,18 +82,18 @@ public class Neurona implements INeurona {
     /**
      * @return the entrada
      */
-    public List<Double> getEntrada() {
+    public List<Elemento<Double>> getEntrada() {
         return entrada;
     }
 
     /**
      * @param entrada the entrada to set
      */
-    public void setEntrada(List<Double> entrada) {
+    public void setEntrada(List<Elemento<Double>> entrada) {
         this.entrada = entrada;
     }
     
-    public void setEntrada(Double entrada) {
+    public void setEntrada(Elemento<Double> entrada) {
         try {
             this.entrada.set(0, entrada);
         }

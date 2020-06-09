@@ -6,7 +6,6 @@
 package gui.interfaces;
 
 import gui.matrices.modelos.Matriz;
-import gui.numeros.modelos.Peso;
 
 /**
  *
@@ -14,7 +13,7 @@ import gui.numeros.modelos.Peso;
  */
 public interface INeurona {
 
-    public void inicializar(Matriz<Peso> matrizPesos);
+    public void inicializar(Matriz<Double> matrizPesos);
 
     public void activar(boolean esEntrada);
 }

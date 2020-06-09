@@ -17,11 +17,11 @@ import java.util.List;
  * @param <Tipo>
  */
 public class Matriz<Tipo> implements IMatriz {
-    private Elemento<Tipo> primero;
-    private Elemento<Tipo> filaFinal;
-    private Elemento<Tipo> columnaFinal;
-    private Integer filas;
-    private Integer columnas;
+    protected Elemento<Tipo> primero;
+    protected Elemento<Tipo> filaFinal;
+    protected Elemento<Tipo> columnaFinal;
+    protected Integer filas;
+    protected Integer columnas;
     
     public Matriz(Tipo[][] matriz) {
         this.filas = 0;
@@ -150,6 +150,29 @@ public class Matriz<Tipo> implements IMatriz {
         return EXITO_AGREGADO_FILA;
     }
     
+    public final String addRowElements(List<Elemento<Tipo>> fila) {
+        Elemento<Tipo> actual = this.primero;
+        if(this.filas < 1) {
+            for(Elemento<Tipo> t : fila) {
+                actual = addElementRight(t, actual);
+                this.columnas++;
+            }
+        }
+        else {
+            if(fila.size() != this.columnas) return ERROR_SIZE_FILA;
+            Elemento<Tipo> t;
+            for(int i = 0 ; i < fila.size() ; i++) {
+                t = fila.get(i);
+                if(i == 0)
+                    actual = addElementDown(t, actual);
+                else
+                    actual = addElementRight(t, actual);
+            }
+        }
+        this.filas++;
+        return EXITO_AGREGADO_FILA;
+    }
+    
     public final String addRow(Tipo[] fila) {
         Elemento<Tipo> actual = this.primero;
         if(this.filas < 1) {
@@ -272,8 +295,9 @@ public class Matriz<Tipo> implements IMatriz {
      * Agrega un elemento al final de la derecha del elemento actual que se indique.
      * @param nuevo
      * @param actual 
+     * @return  
      */
-    private Elemento<Tipo> addElementRight(Elemento<Tipo> nuevo, Elemento<Tipo> actual){
+    protected Elemento<Tipo> addElementRight(Elemento<Tipo> nuevo, Elemento<Tipo> actual){
         if(this.primero == null || actual == null){
             this.primero = nuevo;
             this.filaFinal = nuevo;
@@ -314,7 +338,7 @@ public class Matriz<Tipo> implements IMatriz {
         return actual;
     }
     
-    private Elemento<Tipo> addElementDown(Elemento<Tipo> nuevo, Elemento<Tipo> actual){
+    protected Elemento<Tipo> addElementDown(Elemento<Tipo> nuevo, Elemento<Tipo> actual){
         if(this.primero == null || actual == null){
             this.primero = nuevo;
             this.filaFinal = nuevo;

@@ -8,7 +8,7 @@ package gui.neuronas.modelos;
 import gui.funciones.modelos.Sigmoidea;
 import gui.interfaces.IFuncionActivacion;
 import gui.matrices.modelos.Matriz;
-import gui.numeros.modelos.Peso;
+import gui.matrices.modelos.Vector;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,12 +20,12 @@ public abstract class CapaNeuronas {
     private int numeroCapa;
     protected int numeroDeNeuronasEnCapa;
     protected List<Neurona> neuronas;
-    protected Matriz<Peso> matrizPesos;
+    protected Matriz<Double> matrizPesos;
     protected IFuncionActivacion funcionAct;
     protected CapaNeuronas capaAnterior;
     protected CapaNeuronas capaSiguiente;
-    protected List<Double> entrada;
-    protected List<Double> salida;
+    protected Vector<Double> entrada;
+    protected Vector<Double> salida;
     protected int numeroEntradas;
     
     public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas){
@@ -34,8 +34,8 @@ public abstract class CapaNeuronas {
         this.matrizPesos = new Matriz();
         this.funcionAct = iaf;
         this.numeroEntradas = numeroEntradas;
-        this.entrada = new ArrayList<>(numeroEntradas);
-        this.salida = new ArrayList<>(numeroNeuronas);
+        this.entrada = new Vector();
+        this.salida = new Vector();
         inicializar(false);
     }
     
@@ -45,8 +45,8 @@ public abstract class CapaNeuronas {
         this.numeroDeNeuronasEnCapa = numeroEntradas;
         this.capaAnterior = null;
         this.capaSiguiente = null;
-        this.entrada = new ArrayList<>(numeroEntradas);
-        this.salida = new ArrayList<>(numeroEntradas);
+        this.entrada = new Vector();
+        this.salida = new Vector();
         this.funcionAct = new Sigmoidea(1.0);
         inicializar(true);
     }
@@ -81,18 +81,17 @@ public abstract class CapaNeuronas {
      */
     protected void calculosInternos(boolean esEntrada) {
         for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++) {
-            if(!esEntrada) this.neuronas.get(i).setEntrada(this.entrada);
+            if(!esEntrada) this.neuronas.get(i).setEntrada(this.entrada.toList());
             else {
-                this.neuronas.get(i).setEntrada(this.entrada.get(i));
+                this.neuronas.get(i).setEntrada(this.entrada.getElemento(i));
             }
             this.neuronas.get(i).activar(esEntrada);
-            try {
-                this.salida.set(i, this.neuronas.get(i).getSalida());
-            }
-            catch(IndexOutOfBoundsException iobe) {
-                this.salida.add(this.neuronas.get(i).getSalida());
-            }
+            this.salida.addRow(this.neuronas.get(i).getSalida());
         }
+    }
+    
+    protected void calculoSalida(boolean esEntrada) {
+        
     }
     
     public int getNumeroCapa() {
@@ -176,28 +175,28 @@ public abstract class CapaNeuronas {
     /**
      * @return the entrada
      */
-    public List<Double> getEntrada() {
+    public Vector<Double> getEntrada() {
         return entrada;
     }
 
     /**
      * @param entrada the entrada to set
      */
-    public void setEntrada(List<Double> entrada) {
+    public void setEntrada(Vector<Double> entrada) {
         this.entrada = entrada;
     }
 
     /**
      * @return the salida
      */
-    public List<Double> getSalida() {
+    public Vector<Double> getSalida() {
         return salida;
     }
 
     /**
      * @param salida the salida to set
      */
-    public void setSalida(List<Double> salida) {
+    public void setSalida(Vector<Double> salida) {
         this.salida = salida;
     }
 

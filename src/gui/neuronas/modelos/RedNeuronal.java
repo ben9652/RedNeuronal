@@ -9,6 +9,7 @@ package gui.neuronas.modelos;
 
 import gui.interfaces.IFuncionActivacion;
 import gui.matrices.modelos.Matriz;
+import gui.matrices.modelos.Vector;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class RedNeuronal {
      * Se inicializan los datos en la capa de entrada
      */
     public void calculosInternos() {
-        this.capaEntrada.setEntrada(this.entrada);
+        this.capaEntrada.setEntrada(new Vector(this.entrada));
         this.capaEntrada.calculosInternos(true);
         
         for(int i = 0 ; i < this.numeroCapasOcultas ; i++) {
@@ -88,7 +89,7 @@ public class RedNeuronal {
         
         this.capaSalida.setEntrada(this.capaSalida.getCapaAnterior().getSalida());
         this.capaSalida.calculosInternos(false);
-        this.salida = this.capaSalida.getSalida();
+        this.salida = this.capaSalida.getSalida().toListTipo();
     }
     
     public void print(){
@@ -109,7 +110,7 @@ public class RedNeuronal {
                 Number[][] matrizNumeros = new Number[capa.matrizPesos.getFilas()][capa.matrizPesos.getColumnas()];
                 for(int i = 0 ; i < capa.matrizPesos.getFilas() ; i++) {
                     for(int j = 0 ; j < capa.matrizPesos.getColumnas() ; j++)
-                        matrizNumeros[i][j] = capa.matrizPesos.getElemento(i, j).getElemento().getPeso();
+                        matrizNumeros[i][j] = capa.matrizPesos.getElemento(i, j).getElemento();
                 }
                 Matriz<Number> matriz = new Matriz(matrizNumeros);
                 System.out.println("\n");
