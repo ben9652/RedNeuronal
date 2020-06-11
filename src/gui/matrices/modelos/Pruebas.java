@@ -13,7 +13,8 @@ import java.util.List;
  * @author Benjamin
  */
 public class Pruebas {
-    public static void main(String[] args) {        
+    public static void main(String[] args) {
+        Matriz<Double> matriz = Matriz.crearMatrizDouble(2, 3);
 //        Number[][] a = {
 //            {9, 5, 1},
 //            {0, 7, 8},

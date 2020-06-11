@@ -7,10 +7,11 @@
 */
 package gui.neuronas.modelos;
 
+import gui.aprendizaje.modelos.Backpropagation;
 import gui.interfaces.IFuncionActivacion;
 import gui.matrices.modelos.Matriz;
+import gui.matrices.modelos.Vector;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,9 +26,9 @@ public class RedNeuronal {
     private int numeroCapasOcultas = 0;
     private int numeroEntradas;
     private int numeroSalidas;
-    protected List<Double> entrada;
-    protected List<Double> salida;
-    private List<Double> salidaDeseada;
+    protected Vector<Double> entrada;
+    protected Vector<Double> salida;
+    private Backpropagation bp;
     
     public RedNeuronal(int numeroEntradas, 
                        int numeroSalidas, 
@@ -35,9 +36,8 @@ public class RedNeuronal {
                        IFuncionActivacion [] fnActOcultas, 
                        IFuncionActivacion fnActSalida) {
         this.capasOcultas = new ArrayList<>();
-        this.entrada = new ArrayList<>(numeroEntradas);
-        this.salida = new ArrayList<>(numeroSalidas);
-        this.salidaDeseada = new ArrayList<>(numeroSalidas);
+        this.entrada = new Vector();
+        this.salida = new Vector();
         
         this.numeroEntradas = numeroEntradas;
         addCapa(new CapaEntrada(numeroEntradas));
@@ -78,10 +78,8 @@ public class RedNeuronal {
     
     /**
      * Se inicializan los datos en la capa de entrada
-     * @param salidaDeseada
      */
-    public void calculoActivaciones(Double[] salidaDeseada) {
-        this.salidaDeseada.addAll(Arrays.asList(salidaDeseada));
+    public void calculoActivaciones() {
         this.capaEntrada.setEntrada(this.entrada);
         this.capaEntrada.calculoSalida(true);
         
@@ -94,6 +92,43 @@ public class RedNeuronal {
         this.capaSalida.setEntrada(this.capaSalida.getCapaAnterior().getSalida());
         this.capaSalida.calculoSalida(false);
         this.salida = this.capaSalida.getSalida();
+    }
+    
+    /**
+     * 
+     * @param salidaDeseada
+     * @return 
+     */
+    public String calculoCosto(Vector<Double> salidaDeseada) {
+        if(salidaDeseada.size() != this.salida.size()) 
+            return "El tamaño de la salida deseada debe ser igual al de la salida de la red.\nIntente con otro conjunto de salidas, pero con el tamaño adecuado.";
+        if(this.bp == null) this.bp = new Backpropagation(this.salida, salidaDeseada, 0.5);
+        else this.bp.actualizarCosto(this.salida, salidaDeseada);
+        
+        String vectorSalida = "(";
+        for(int i = 0 ; i < this.salida.size() ; i++) {
+            vectorSalida += String.format("%.2f", this.salida.get(i).getElemento());
+            if(i != this.salida.size() - 1)
+                vectorSalida += ", ";
+            else
+                vectorSalida += ")";
+        }
+        
+        String vectorSalidaDeseada = "(";
+        for(int i = 0 ; i < salidaDeseada.size() ; i++) {
+            vectorSalidaDeseada += String.format("%.2f", salidaDeseada.get(i).getElemento());
+            if(i != this.salida.size() - 1)
+                vectorSalidaDeseada += ", ";
+            else
+                vectorSalidaDeseada += ")";
+        }
+        
+        return "\nÉpoca: " + bp.getIteracion() + "\nSalida esperada: " + vectorSalidaDeseada + "\nSalida: " + vectorSalida + "\nCosto: " + bp.getCosto();
+    }
+    
+    public void aprendizaje() {
+        for(CapaNeuronas capa = this.capaSalida ; !(capa instanceof CapaEntrada) ; capa = capa.getCapaAnterior())
+            capa.aprendizaje(this.bp);
     }
     
     public void print(){
@@ -111,10 +146,10 @@ public class RedNeuronal {
     public void printMatricesPesos() {
         for(CapaNeuronas capa = (CapaEntrada)this.capaEntrada ; capa != null ; capa = capa.getCapaSiguiente()) {
             try {
-                Number[][] matrizNumeros = new Number[capa.matrizPesos.getFilas()][capa.matrizPesos.getColumnas()];
-                for(int i = 0 ; i < capa.matrizPesos.getFilas() ; i++) {
-                    for(int j = 0 ; j < capa.matrizPesos.getColumnas() ; j++)
-                        matrizNumeros[i][j] = capa.matrizPesos.getElemento(i, j).getElemento();
+                Number[][] matrizNumeros = new Number[capa.getFilasMatrizPesos()][capa.getColumnasMatrizPesos()];
+                for(int i = 0 ; i < capa.getFilasMatrizPesos() ; i++) {
+                    for(int j = 0 ; j < capa.getColumnasMatrizPesos() ; j++)
+                        matrizNumeros[i][j] = capa.getElementoMatrizPesos(i, j).getElemento();
                 }
                 Matriz<Number> matriz = new Matriz(matrizNumeros);
                 System.out.println("\n");
@@ -125,18 +160,15 @@ public class RedNeuronal {
     }
     
     public void salidas(){
-        int i = 0;
-        for(Double d : this.salida){
-            System.out.println("Salida " + i + ": " + d);
-            i++;
-        }
+        for(int i = 0 ; i < this.salida.size() ; i++)
+            System.out.println("Salida " + i + ": " + this.salida.get(i).getElemento());
     }
 
     /**
      * 
      * @return la entrada
      */
-    public List<Double> getEntrada() {
+    public Vector<Double> getEntrada() {
         return entrada;
     }
 
@@ -144,7 +176,7 @@ public class RedNeuronal {
      * 
      * @param entrada la entrada a setear
      */
-    public void setEntrada(List<Double> entrada) {
+    public void setEntrada(Vector<Double> entrada) {
         this.entrada = entrada;
     }
 
@@ -152,7 +184,7 @@ public class RedNeuronal {
      * 
      * @return la salida
      */
-    public List<Double> getSalida() {
+    public Vector<Double> getSalida() {
         return salida;
     }
 }

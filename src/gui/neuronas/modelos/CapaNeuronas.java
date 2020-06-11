@@ -5,8 +5,10 @@
  */
 package gui.neuronas.modelos;
 
+import gui.aprendizaje.modelos.Backpropagation;
 import gui.funciones.modelos.Sigmoidea;
 import gui.interfaces.IFuncionActivacion;
+import gui.matrices.modelos.Elemento;
 import gui.matrices.modelos.Matriz;
 import gui.matrices.modelos.Vector;
 import java.util.List;
@@ -27,6 +29,14 @@ public abstract class CapaNeuronas {
                                                         //Por ejemplo: matrizPesos[j][k] es el peso de la arista cuyo origen está
                                                         //en la k-ésima neurona de la capa anterior, y su destino en la j-ésima
                                                         //neurona de esta capa.
+    
+    protected Matriz<Double> matrizGradientePesos;      //Esta es la matriz con las derivadas calculadas que determinarán cómo es
+                                                        //que se deberían cambiar los pesos de la matriz de los pesos.
+                                                        //Es decir que contendrá dC/dw[j][k] = (1/n)*suma(0, n-1, dC[i]/dw[j][k]).
+    
+    protected Matriz<Double> matrizGradientePesosSuma;  //Esta es una matriz que llevará la suma de todas las derivadas de los costos
+                                                        //individuales respecto a los pesos.
+                                                        //Es decir que contendrá suma(0, n-1, dC[i]/dw[j][k])
     
     protected IFuncionActivacion funcionAct;
     protected CapaNeuronas capaAnterior;
@@ -76,29 +86,6 @@ public abstract class CapaNeuronas {
         this.funcionAct = new Sigmoidea(1.0);
     }
     
-    /**
-     * Este método agrega las neuronas que le corresponden a la capa
-     * @param esEntrada
-     */
-//    protected void inicializar(boolean esEntrada) {
-//        if(!esEntrada) {
-//            for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++) {
-//                try {
-//                    this.neuronas.get(i).setFuncionActivacion(this.funcionAct);
-//                }
-//                catch(IndexOutOfBoundsException iobe) {
-//                    this.neuronas.add(new Neurona(this.numeroEntradas, this.funcionAct));
-//                }
-//                
-//                this.neuronas.get(i).inicializar(this.matrizPesos);
-//            }
-//        }
-//        else {
-//            for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++)
-//                this.neuronas.add(new Neurona(1, this.funcionAct));
-//        }
-//    }
-    
     private void inicializar() {
         Random random = new Random();
         
@@ -111,27 +98,15 @@ public abstract class CapaNeuronas {
             this.matrizPesos.addRow(pesos);
         }
         
+        this.matrizGradientePesos = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+        this.matrizGradientePesosSuma = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+        
         Double[] biasesList = new Double[this.numeroDeNeuronasEnCapa];
         for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++)
             biasesList[i] = -1.0;
         
         this.biases = new Vector(biasesList);
     }
-    
-    /**
-     * Realiza los cálculos correspondientes en las neuronas para ofrecer
-     * una salida en las mismas activándolas.
-     * @param esEntrada
-     */
-//    protected void calculosInternos(boolean esEntrada) {
-//        for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++) {
-//            if(!esEntrada) this.neuronas.get(i).setEntrada(this.entrada.toList());
-//            else 
-//                this.neuronas.get(i).setEntrada(this.entrada.getElemento(i));
-//            this.neuronas.get(i).activar(esEntrada);
-//            this.salida.addRow(this.neuronas.get(i).getSalida());
-//        }
-//    }
     
     protected void calculoSalida(boolean esEntrada) {
         try {
@@ -142,7 +117,7 @@ public abstract class CapaNeuronas {
                 //y finalmente, se aplica la función de activación. Todo este resultado es la salida total de esta capa.
                 Vector<Double> vectorProducto = Matriz.producto(this.matrizPesos, this.entrada);
                 this.salidaAntesDeActivacion = Vector.suma(vectorProducto, this.biases);
-                this.salida = f(this.salidaAntesDeActivacion);
+                this.salida = f(this.getSalidaAntesDeActivacion());
             }
             else
                 //Se le aplica a la entrada la función de activación, y esta resulta ser la salida de la capa.
@@ -153,11 +128,17 @@ public abstract class CapaNeuronas {
         }
     }
     
+    protected void aprendizaje(Backpropagation bp) {
+        bp.actualizarGradiente(this.matrizGradientePesos, this.matrizGradientePesosSuma, this);
+        
+        this.matrizPesos = Matriz.suma(this.matrizPesos, Matriz.producto(bp.getLearningRate(), this.matrizGradientePesos));
+    }
+    
     private Vector<Double> f(Vector<Double> vector) {
         Vector<Double> vectorFuncionAplicada = new Vector();
         
         for(int i = 0 ; i < vector.size() ; i++)
-            vectorFuncionAplicada.addRow(this.funcionAct.calc(vector.getElemento(i).getElemento()));
+            vectorFuncionAplicada.addRow(this.funcionAct.calc(vector.get(i).getElemento()));
         
         return vectorFuncionAplicada;
     }
@@ -236,15 +217,15 @@ public abstract class CapaNeuronas {
     /**
      * @param entrada the entrada to set
      */
-    public void setEntrada(List<Double> entrada) {
-        this.entrada = new Vector(entrada);
+    public void setEntrada(Vector<Double> entrada) {
+        this.entrada = entrada;
     }
 
     /**
      * @return the salida
      */
-    public List<Double> getSalida() {
-        return salida.toListTipo();
+    public Vector<Double> getSalida() {
+        return salida;
     }
 
     /**
@@ -252,6 +233,13 @@ public abstract class CapaNeuronas {
      */
     public void setSalida(Vector<Double> salida) {
         this.salida = salida;
+    }
+
+    /**
+     * @return the salidaAntesDeActivacion
+     */
+    public Vector<Double> getSalidaAntesDeActivacion() {
+        return salidaAntesDeActivacion;
     }
 
     /**
@@ -270,5 +258,22 @@ public abstract class CapaNeuronas {
     
     public int getNumeroSalidas() {
         return this.numeroDeNeuronasEnCapa;
+    }
+
+    /**
+     * @param fila
+     * @param columna
+     * @return the matrizPesos
+     */
+    public Elemento<Double> getElementoMatrizPesos(int fila, int columna) {
+        return this.matrizPesos.get(fila, columna);
+    }
+    
+    public int getFilasMatrizPesos() {
+        return this.matrizPesos.getFilas();
+    }
+    
+    public int getColumnasMatrizPesos() {
+        return this.matrizPesos.getColumnas();
     }
 }

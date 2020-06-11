@@ -12,6 +12,8 @@ package gui.interfaces;
 public interface IFuncionActivacion {
     double calc(double x);
     
+    double derivada(double x);
+    
     public enum FuncionActivacion {
       STEP, LINEAR, SIGMOID, HYPERTAN
     }

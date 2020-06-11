@@ -82,7 +82,7 @@ public class Imagen {
     public boolean esEscalaDeGrises() {
         boolean esEscalaDeGrises = true;
         for(int i = 0 ; i < this.verAlto() ; i++) {
-            Elemento<Integer[]> pixel = this.colores.getElemento(i, 0);
+            Elemento<Integer[]> pixel = this.colores.get(i, 0);
             for(int j = 0 ; j < this.verAncho() ; j++, pixel = pixel.getDerecha()) {
                 Integer[] p = pixel.getElemento();
                 if(!Objects.equals(p[0], p[1]) || !Objects.equals(p[1], p[2])) return false;
@@ -98,7 +98,7 @@ public class Imagen {
             Matriz<Integer[]> matriz = this.colores;
             if(!esEscalaDeGrises) {
                 for(int j = 0 ; j < this.verAlto() ; j++) {
-                    Elemento<Integer[]> pixel = matriz.getElemento(0, j);
+                    Elemento<Integer[]> pixel = matriz.get(0, j);
                     for(int i = 0 ; i < this.verAncho() ; i++, pixel = pixel.getAbajo()) {
                         bw.write("[" + pixel.getElemento()[0].toString() + "," + pixel.getElemento()[1].toString() + "," + pixel.getElemento()[2].toString() + "]" + (pixel.getAbajo() != null? SEPARADOR_COLUMNA : ""));
                         if(pixel.getAbajo() == null) {bw.newLine(); bw.newLine();}
@@ -107,7 +107,7 @@ public class Imagen {
             }
             else {
                 for(int j = 0 ; j < this.verAlto() ; j++) {
-                    Elemento<Integer[]> pixel = matriz.getElemento(0, j);
+                    Elemento<Integer[]> pixel = matriz.get(0, j);
                     for(int i= 0 ; i < this.verAncho() ; i++, pixel = pixel.getAbajo()) {
                         String gris = pixel.getElemento()[0].toString();
                         String escritura = gris + (pixel.getAbajo() != null? SEPARADOR_COLUMNA : "");

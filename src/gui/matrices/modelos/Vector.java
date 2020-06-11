@@ -91,8 +91,8 @@ public class Vector<Tipo> extends Matriz<Tipo> {
         return lista;
     }
     
-    public Elemento<Tipo> getElemento(int posicion) {
-        return super.getElemento(posicion, 0);
+    public Elemento<Tipo> get(int posicion) {
+        return super.get(posicion, 0);
     }
     
     public int size() {

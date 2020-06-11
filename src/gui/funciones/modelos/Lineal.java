@@ -21,6 +21,7 @@ public class Lineal implements IFuncionActivacion {
         return Math.max(0.0, this.a * x);
     }
     
+    @Override
     public double derivada(double x) {
         return x >= 0 ? 1.0 : 0.0;
     }

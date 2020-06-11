@@ -21,6 +21,7 @@ public class Sigmoidea implements IFuncionActivacion {
         return 1.0 / (1.0 + Math.exp(-a*x));
     }
     
+    @Override
     public double derivada(double x) {
         return Math.exp(-a*x) / Math.pow(1 + Math.exp(-a*x), 2);
     }

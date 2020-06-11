@@ -7,7 +7,6 @@ package gui.matrices.modelos;
 
 import gui.interfaces.IMatriz;
 import static gui.interfaces.IMatriz.ERROR_SIZE_FILA;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,17 +28,22 @@ public class Matriz<Tipo> implements IMatriz {
         for(Tipo[] i : matriz)
             System.out.println(addRow(i));
     }
-    
-    public Matriz(int filas, int columnas){
-        this.filas = filas;
-        this.columnas = columnas;
-        for(int i = 0 ; i < filas ; i++) 
-            System.out.println(addRow(new ArrayList<>(columnas)));
-    }
 
     public Matriz() {
         this.filas = 0;
         this.columnas = 0;
+    }
+    
+    public static Matriz<Double> crearMatrizDouble(int filas, int columnas) {
+        Matriz<Double> matriz = new Matriz();
+        
+        List<Double> lista = new ArrayList<>();
+        
+        for(int j = 0 ; j < columnas ; j++) lista.add(0.0);
+        
+        for(int i = 0 ; i < filas ; i++) matriz.addRow(lista);
+        
+        return matriz;
     }
     
     public Integer getFilas() {
@@ -94,6 +98,29 @@ public class Matriz<Tipo> implements IMatriz {
         
         System.out.println(EXITO_PRODUCTO);
         return matrizProducto;
+    }
+    
+    public static Matriz<Double> producto(Double escalar, Matriz<Double> matriz) {
+        
+        Matriz<Double> matrizSuma = new Matriz<>();
+        
+        for(Elemento<Double> primerElementoFila = matriz.primero;
+            primerElementoFila != null;
+            primerElementoFila = primerElementoFila.getAbajo()) {
+            
+            List<Double> filaNumeros = new ArrayList<>();
+            for(Elemento<Double> indiceMat = primerElementoFila;
+                indiceMat != null;
+                indiceMat = indiceMat.getDerecha()) {
+                
+                Double numero = escalar * indiceMat.getElemento();
+                filaNumeros.add(numero);
+            }
+            
+            matrizSuma.addRow(filaNumeros);
+        }
+        
+        return matrizSuma;
     }
     
     public static Vector<Double> producto(Matriz<Double> matriz, Vector<Double> vector) {
@@ -256,7 +283,7 @@ public class Matriz<Tipo> implements IMatriz {
      * @param columna
      * @return
      */
-    public Elemento<Tipo> getElemento(int fila, int columna) {
+    public Elemento<Tipo> get(int fila, int columna) {
         try {
             if((fila < 0 || fila > this.filas-1) && (columna < 0 || columna > this.columnas-1)) throw new IndiceFueraDeRango("El índice ingresado está fuera de la dimensión de la matriz.");
         }
@@ -276,6 +303,10 @@ public class Matriz<Tipo> implements IMatriz {
         }
         
         return elementoBuscado;
+    }
+    
+    public void setElemento(int fila, int columna, Tipo elemento) {
+        this.get(fila, columna).setElemento(elemento);
     }
     
     private Elemento<Tipo> seleccionFila(int fila) {
@@ -423,7 +454,7 @@ public class Matriz<Tipo> implements IMatriz {
         Double[][] array = new Double[matriz.filas][matriz.columnas];
         for(int i = 0 ; i < matriz.filas ; i++) {
             for(int j = 0 ; j < matriz.columnas ; j++) {
-                array[i][j] = matriz.getElemento(i, j).getElemento();
+                array[i][j] = matriz.get(i, j).getElemento();
             }
         }
         return array;
@@ -432,7 +463,7 @@ public class Matriz<Tipo> implements IMatriz {
     public void print() {
         for(int i = 0 ; i < this.filas ; i++) {
             for(int j = 0 ; j < this.columnas ; j++) 
-                System.out.print(this.getElemento(i, j).getElemento() + "\t\t");
+                System.out.print(this.get(i, j).getElemento() + "\t\t");
             System.out.println("\n");
         }
     }

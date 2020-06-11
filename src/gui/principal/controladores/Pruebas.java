@@ -7,6 +7,7 @@ package gui.principal.controladores;
 
 import gui.funciones.modelos.Sigmoidea;
 import gui.interfaces.IFuncionActivacion;
+import gui.matrices.modelos.Vector;
 import gui.neuronas.modelos.RedNeuronal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.Random;
  */
 public class Pruebas {
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
         Random r = new Random();
         r.setSeed(0);
         
@@ -40,10 +42,10 @@ public class Pruebas {
         System.out.println("Feeding the values [" + String.valueOf(entradaNeuronal[0]) + " ; " +
                             String.valueOf(entradaNeuronal[1]) + "] to the neural network");
         
-        redN.setEntrada(toList(entradaNeuronal));
+        redN.setEntrada(new Vector(entradaNeuronal));
         Double[] salidaDeseada = {1.0};
-        redN.calculoActivaciones(salidaDeseada);
-        salidaNeuronal = redN.getSalida();
+        redN.calculoActivaciones();
+        salidaNeuronal = redN.getSalida().toListTipo();
         
         redN.salidas();
         
@@ -53,14 +55,16 @@ public class Pruebas {
         System.out.println("Feeding the values [" + String.valueOf(entradaNeuronal[0]) + " ; " +
                             String.valueOf(entradaNeuronal[1]) + "] to the neural network");
         
-        redN.setEntrada(toList(entradaNeuronal));
+        redN.setEntrada(new Vector(entradaNeuronal));
         salidaDeseada[0] = 0.0;
-        redN.calculoActivaciones(salidaDeseada);
-        salidaNeuronal = redN.getSalida();
+        redN.calculoActivaciones();
+        salidaNeuronal = redN.getSalida().toListTipo();
         
         redN.salidas();
         
         redN.printMatricesPesos();
+        
+        System.out.println("Tiempo transcurrido en el programa: " + (System.currentTimeMillis() - startTime) + " milisegundos");
     }
     
     public static List<Double> toList(Double[] coleccion){
