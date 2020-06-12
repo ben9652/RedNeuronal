@@ -5,6 +5,7 @@
  */
 package gui.neuronas.modelos;
 
+import gui.matrices.modelos.DimensionesIncompatibles;
 import gui.matrices.modelos.Vector;
 
 /**
@@ -18,7 +19,7 @@ public class CapaEntrada extends CapaNeuronas {
     }
     
     @Override
-    public void calculoSalida(boolean esEntrada) {
+    public void calculoSalida(boolean esEntrada) throws CapaSinEntrada, DimensionesIncompatibles {
         super.calculoSalida(esEntrada);
     }
     

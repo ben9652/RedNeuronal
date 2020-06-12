@@ -5,9 +5,10 @@
  */
 package gui.neuronas.modelos;
 
-import gui.aprendizaje.modelos.Backpropagation;
 import gui.funciones.modelos.Sigmoidea;
+import gui.interfaces.IBackpropagation;
 import gui.interfaces.IFuncionActivacion;
+import gui.matrices.modelos.DimensionesIncompatibles;
 import gui.matrices.modelos.Elemento;
 import gui.matrices.modelos.Matriz;
 import gui.matrices.modelos.Vector;
@@ -60,6 +61,8 @@ public abstract class CapaNeuronas {
                                                         //bias del final.
     
     protected Vector<Double> biases;                    //Son los biases que tiene cada una de las neuronas.
+    protected Vector<Double> gradienteBiases;
+    protected Vector<Double> gradienteBiasesSuma;
     
     protected int numeroEntradas;                       //Si esta es la capa de entrada, sería igual a la cantidad de neuronas que hay
                                                         //en esta capa. En otro caso, sería el número de activaciones que le llega a cada
@@ -75,6 +78,17 @@ public abstract class CapaNeuronas {
         this.biases = new Vector();
         inicializar();
     }
+    
+//    public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos){
+//        this.numeroDeNeuronasEnCapa = numeroNeuronas;
+//        this.matrizPesos = new Matriz();
+//        this.funcionAct = iaf;
+//        this.numeroEntradas = numeroEntradas;
+//        this.entrada = new Vector();
+//        this.salida = new Vector();
+//        this.biases = new Vector();
+//        inicializar();
+//    }
     
     public CapaNeuronas(int numeroEntradas){
         this.numeroEntradas = numeroEntradas;
@@ -106,32 +120,47 @@ public abstract class CapaNeuronas {
             biasesList[i] = -1.0;
         
         this.biases = new Vector(biasesList);
+    
+        this.gradienteBiases = Vector.crearVectorDouble(this.biases.size());
+        this.gradienteBiasesSuma = Vector.crearVectorDouble(this.biases.size());
     }
     
-    protected void calculoSalida(boolean esEntrada) {
-        try {
-            if(this.numeroEntradas == 0) throw new CapaSinEntrada("¡Capa sin entradas!");
-            
-            if(!esEntrada) {
-                //Se hace WX+B, donde W es la matriz de los pesos, X el vector de entrada, y B el vector de los biases;
-                //y finalmente, se aplica la función de activación. Todo este resultado es la salida total de esta capa.
-                Vector<Double> vectorProducto = Matriz.producto(this.matrizPesos, this.entrada);
-                this.salidaAntesDeActivacion = Vector.suma(vectorProducto, this.biases);
-                this.salida = f(this.getSalidaAntesDeActivacion());
-            }
-            else
-                //Se le aplica a la entrada la función de activación, y esta resulta ser la salida de la capa.
-                this.salida = f(this.entrada);
+//    private void inicializar(Double[][] pesos) {
+//        this.matrizPesos = new Matriz(pesos);
+//        
+//        this.matrizGradientePesos = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+//        this.matrizGradientePesosSuma = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+//        
+//        Double[] biasesList = new Double[this.numeroDeNeuronasEnCapa];
+//        for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++)
+//            biasesList[i] = -1.0;
+//        
+//        this.biases = new Vector(biasesList);
+//        
+//        this.gradienteBiases = Vector.crearVectorDouble(this.biases.size());
+//        this.gradienteBiasesSuma = Vector.crearVectorDouble(this.biases.size());
+//    }
+    
+    protected void calculoSalida(boolean esEntrada) throws CapaSinEntrada, DimensionesIncompatibles {
+        if(this.numeroEntradas == 0) throw new CapaSinEntrada("¡Capa sin entradas!");
+
+        if(!esEntrada) {
+            //Se hace WX+B, donde W es la matriz de los pesos, X el vector de entrada, y B el vector de los biases;
+            //y finalmente, se aplica la función de activación. Todo este resultado es la salida total de esta capa.
+            Vector<Double> vectorProducto = Matriz.producto(this.matrizPesos, this.entrada);
+            this.salidaAntesDeActivacion = Vector.suma(vectorProducto, this.biases);
+            this.salida = f(this.getSalidaAntesDeActivacion());
         }
-        catch(CapaSinEntrada cse) {
-            System.out.println(cse.getMessage());
-        }
+        else
+            //Se le aplica a la entrada la función de activación, y esta resulta ser la salida de la capa.
+            this.salida = f(this.entrada);
     }
     
-    protected void aprendizaje(Backpropagation bp) {
-        bp.actualizarGradiente(this.matrizGradientePesos, this.matrizGradientePesosSuma, this);
-        
-        this.matrizPesos = Matriz.suma(this.matrizPesos, Matriz.producto(bp.getLearningRate(), this.matrizGradientePesos));
+    protected void aprendizaje(IBackpropagation bp, Double learningRate) throws DimensionesIncompatibles {
+        bp.actualizarParametros(this.matrizGradientePesos, this.matrizGradientePesosSuma, this.gradienteBiases, this.gradienteBiasesSuma, this);
+
+        this.matrizPesos = Matriz.resta(this.matrizPesos, Matriz.producto(learningRate, this.matrizGradientePesos));
+        this.biases = Vector.resta(this.biases, Vector.producto(learningRate, this.gradienteBiases));
     }
     
     private Vector<Double> f(Vector<Double> vector) {
@@ -263,10 +292,10 @@ public abstract class CapaNeuronas {
     /**
      * @param fila
      * @param columna
-     * @return the matrizPesos
+     * @return El número del elemento de la fila y columna indicada
      */
-    public Elemento<Double> getElementoMatrizPesos(int fila, int columna) {
-        return this.matrizPesos.get(fila, columna);
+    public Double getElementoMatrizPesos(int fila, int columna) {
+        return this.matrizPesos.get(fila, columna).getElemento();
     }
     
     public int getFilasMatrizPesos() {
@@ -275,5 +304,13 @@ public abstract class CapaNeuronas {
     
     public int getColumnasMatrizPesos() {
         return this.matrizPesos.getColumnas();
+    }
+    
+    public void mostrarMatrizPesos() {
+        this.matrizPesos.print();
+    }
+    
+    public void mostrarVectorBiases() {
+        this.biases.print();
     }
 }

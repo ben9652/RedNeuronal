@@ -8,7 +8,9 @@
 package gui.neuronas.modelos;
 
 import gui.aprendizaje.modelos.Backpropagation;
+import gui.interfaces.IBackpropagation;
 import gui.interfaces.IFuncionActivacion;
+import gui.matrices.modelos.DimensionesIncompatibles;
 import gui.matrices.modelos.Matriz;
 import gui.matrices.modelos.Vector;
 import java.util.ArrayList;
@@ -28,16 +30,21 @@ public class RedNeuronal {
     private int numeroSalidas;
     protected Vector<Double> entrada;
     protected Vector<Double> salida;
-    private Backpropagation bp;
+    private IBackpropagation bp;
+    private Double costoPromedio;
+    private Double costoTotal;
     
     public RedNeuronal(int numeroEntradas, 
                        int numeroSalidas, 
                        int [] numeroNeuronasOcultas, 
                        IFuncionActivacion [] fnActOcultas, 
-                       IFuncionActivacion fnActSalida) {
+                       IFuncionActivacion fnActSalida, 
+                       Double[][][] pesos) {
         this.capasOcultas = new ArrayList<>();
         this.entrada = new Vector();
         this.salida = new Vector();
+        this.costoPromedio = 10.0;
+        this.costoTotal = 0.0;
         
         this.numeroEntradas = numeroEntradas;
         addCapa(new CapaEntrada(numeroEntradas));
@@ -51,6 +58,8 @@ public class RedNeuronal {
         int entradas = this.ultimaCapa.getNumeroSalidas();
         addCapaFinal(new CapaSalida(numeroSalidas, fnActSalida, entradas));
         this.numeroSalidas = numeroSalidas;
+        
+        this.bp = new Backpropagation();
     }
     
     private void addCapa(CapaNeuronas capaNueva) {
@@ -78,8 +87,10 @@ public class RedNeuronal {
     
     /**
      * Se inicializan los datos en la capa de entrada
+     * @throws gui.neuronas.modelos.CapaSinEntrada
+     * @throws gui.matrices.modelos.DimensionesIncompatibles
      */
-    public void calculoActivaciones() {
+    public void calculoActivaciones() throws CapaSinEntrada, DimensionesIncompatibles {
         this.capaEntrada.setEntrada(this.entrada);
         this.capaEntrada.calculoSalida(true);
         
@@ -102,33 +113,43 @@ public class RedNeuronal {
     public String calculoCosto(Vector<Double> salidaDeseada) {
         if(salidaDeseada.size() != this.salida.size()) 
             return "El tamaño de la salida deseada debe ser igual al de la salida de la red.\nIntente con otro conjunto de salidas, pero con el tamaño adecuado.";
-        if(this.bp == null) this.bp = new Backpropagation(this.salida, salidaDeseada, 0.5);
-        else this.bp.actualizarCosto(this.salida, salidaDeseada);
         
-        String vectorSalida = "(";
+        this.costoTotal = this.bp.actualizarCosto(this.salida, salidaDeseada, this.costoTotal);
+        this.costoPromedio = (1.0/this.bp.obtenerIteracion()) * this.costoTotal;
+        
+        String vectorEntrada = "[";
+        for(int i = 0 ; i < this.entrada.size() ; i++) {
+            vectorEntrada += String.format("%.0f", this.entrada.get(i).getElemento());
+            if(i != this.entrada.size() - 1)
+                vectorEntrada += ", ";
+            else
+                vectorEntrada += "]";
+        }
+        
+        String vectorSalida = "[";
         for(int i = 0 ; i < this.salida.size() ; i++) {
-            vectorSalida += String.format("%.2f", this.salida.get(i).getElemento());
+            vectorSalida += this.salida.get(i).getElemento();
             if(i != this.salida.size() - 1)
                 vectorSalida += ", ";
             else
-                vectorSalida += ")";
+                vectorSalida += "]";
         }
         
-        String vectorSalidaDeseada = "(";
+        String vectorSalidaDeseada = "[";
         for(int i = 0 ; i < salidaDeseada.size() ; i++) {
-            vectorSalidaDeseada += String.format("%.2f", salidaDeseada.get(i).getElemento());
+            vectorSalidaDeseada += salidaDeseada.get(i).getElemento();
             if(i != this.salida.size() - 1)
                 vectorSalidaDeseada += ", ";
             else
-                vectorSalidaDeseada += ")";
+                vectorSalidaDeseada += "]";
         }
         
-        return "\nÉpoca: " + bp.getIteracion() + "\nSalida esperada: " + vectorSalidaDeseada + "\nSalida: " + vectorSalida + "\nCosto: " + bp.getCosto();
+        return "\n\t\t--------------------O--------------------\n\nÉpoca: " + this.bp.obtenerIteracion() + "\nEntrada: " + vectorEntrada + "\nSalida esperada: " + vectorSalidaDeseada + "\nSalida: " + vectorSalida + "\nCosto: " + this.costoPromedio;
     }
     
-    public void aprendizaje() {
+    public void aprendizaje(Double learningRate) throws DimensionesIncompatibles {
         for(CapaNeuronas capa = this.capaSalida ; !(capa instanceof CapaEntrada) ; capa = capa.getCapaAnterior())
-            capa.aprendizaje(this.bp);
+            capa.aprendizaje(this.bp, learningRate);
     }
     
     public void print(){
@@ -144,18 +165,14 @@ public class RedNeuronal {
     }
     
     public void printMatricesPesos() {
-        for(CapaNeuronas capa = (CapaEntrada)this.capaEntrada ; capa != null ; capa = capa.getCapaSiguiente()) {
-            try {
-                Number[][] matrizNumeros = new Number[capa.getFilasMatrizPesos()][capa.getColumnasMatrizPesos()];
-                for(int i = 0 ; i < capa.getFilasMatrizPesos() ; i++) {
-                    for(int j = 0 ; j < capa.getColumnasMatrizPesos() ; j++)
-                        matrizNumeros[i][j] = capa.getElementoMatrizPesos(i, j).getElemento();
-                }
-                Matriz<Number> matriz = new Matriz(matrizNumeros);
-                System.out.println("\n");
-                matriz.print();
-            }
-            catch(NullPointerException ipe) {}
+        for(CapaNeuronas capa = this.capaEntrada.getCapaSiguiente() ; capa != null ; capa = capa.getCapaSiguiente()) {
+            System.out.println("Pesos capa " + capa.getNumeroCapa() + ":");
+            capa.mostrarMatrizPesos();
+
+            System.out.println("\nBiases capa " + capa.getNumeroCapa() + ":");
+            capa.mostrarVectorBiases();
+
+            System.out.println("");
         }
     }
     
@@ -186,5 +203,9 @@ public class RedNeuronal {
      */
     public Vector<Double> getSalida() {
         return salida;
+    }
+    
+    public Double getCosto() {
+        return this.costoPromedio;
     }
 }

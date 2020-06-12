@@ -26,7 +26,7 @@ public class Matriz<Tipo> implements IMatriz {
         this.filas = 0;
         this.columnas = 0;
         for(Tipo[] i : matriz)
-            System.out.println(addRow(i));
+            addRow(i);
     }
 
     public Matriz() {
@@ -60,15 +60,10 @@ public class Matriz<Tipo> implements IMatriz {
      * @param mat1
      * @param mat2
      * @return La matriz producto.
+     * @throws gui.matrices.modelos.DimensionesIncompatibles
      */
-    public static Matriz<Double> producto(Matriz<Double> mat1, Matriz<Double> mat2) {
-        try {
-            if(!mat1.columnas.equals(mat2.filas)) throw new DimensionesIncompatibles(ERROR_PRODUCTO);
-        }
-        catch(DimensionesIncompatibles di) {
-            System.out.println(di.getMessage());
-            return null;
-        }
+    public static Matriz<Double> producto(Matriz<Double> mat1, Matriz<Double> mat2) throws DimensionesIncompatibles {
+        if(!mat1.columnas.equals(mat2.filas)) throw new DimensionesIncompatibles(ERROR_PRODUCTO);
         
         List<Double> fila_a_agregar = new ArrayList<>();
         Matriz<Double> matrizProducto = new Matriz<>();
@@ -96,13 +91,13 @@ public class Matriz<Tipo> implements IMatriz {
             primerElementoColumna = mat2.primero;
         }
         
-        System.out.println(EXITO_PRODUCTO);
+        String exito = EXITO_PRODUCTO;
         return matrizProducto;
     }
     
     public static Matriz<Double> producto(Double escalar, Matriz<Double> matriz) {
         
-        Matriz<Double> matrizSuma = new Matriz<>();
+        Matriz<Double> matrizProducto = new Matriz<>();
         
         for(Elemento<Double> primerElementoFila = matriz.primero;
             primerElementoFila != null;
@@ -117,20 +112,14 @@ public class Matriz<Tipo> implements IMatriz {
                 filaNumeros.add(numero);
             }
             
-            matrizSuma.addRow(filaNumeros);
+            matrizProducto.addRow(filaNumeros);
         }
         
-        return matrizSuma;
+        return matrizProducto;
     }
     
-    public static Vector<Double> producto(Matriz<Double> matriz, Vector<Double> vector) {
-        try {
-            if(!matriz.columnas.equals(vector.filas)) throw new DimensionesIncompatibles(ERROR_PRODUCTO);
-        }
-        catch(DimensionesIncompatibles di) {
-            System.out.println(di.getMessage());
-            return null;
-        }
+    public static Vector<Double> producto(Matriz<Double> matriz, Vector<Double> vector) throws DimensionesIncompatibles {
+        if(!matriz.columnas.equals(vector.filas)) throw new DimensionesIncompatibles(ERROR_PRODUCTO);
         
         Vector<Double> vectorProducto = new Vector<>();
         Elemento<Double> primerElementoFila = matriz.primero;
@@ -151,18 +140,12 @@ public class Matriz<Tipo> implements IMatriz {
             primerElementoFila = primerElementoFila.getAbajo();
         }
         
-        System.out.println(EXITO_PRODUCTO);
+        String exito = EXITO_PRODUCTO;
         return vectorProducto;
     }
     
-    public static Matriz<Double> suma(Matriz<Double> mat1, Matriz<Double> mat2) {
-        try {
-            if(!mat1.filas.equals(mat2.filas) || !mat1.columnas.equals(mat2.columnas)) throw new DimensionesIncompatibles(ERROR_SUMA);
-        }
-        catch(DimensionesIncompatibles di) {
-            System.out.println(di.getMessage());
-            return null;
-        }
+    public static Matriz<Double> suma(Matriz<Double> mat1, Matriz<Double> mat2) throws DimensionesIncompatibles {
+        if(!mat1.filas.equals(mat2.filas) || !mat1.columnas.equals(mat2.columnas)) throw new DimensionesIncompatibles(ERROR_SUMA);
         
         Matriz<Double> matrizSuma = new Matriz<>();
         
@@ -176,6 +159,30 @@ public class Matriz<Tipo> implements IMatriz {
                 indiceMat1 = indiceMat1.getDerecha(), indiceMat2 = indiceMat2.getDerecha()) {
                 
                 Double numero = indiceMat1.getElemento() + indiceMat2.getElemento();
+                filaNumeros.add(numero);
+            }
+            
+            matrizSuma.addRow(filaNumeros);
+        }
+        
+        return matrizSuma;
+    }
+    
+    public static Matriz<Double> resta(Matriz<Double> mat1, Matriz<Double> mat2) throws DimensionesIncompatibles {
+        if(!mat1.filas.equals(mat2.filas) || !mat1.columnas.equals(mat2.columnas)) throw new DimensionesIncompatibles(ERROR_SUMA);
+        
+        Matriz<Double> matrizSuma = new Matriz<>();
+        
+        for(Elemento<Double> primerElementoFila1 = mat1.primero, primerElementoFila2 = mat2.primero;
+            primerElementoFila1 != null || primerElementoFila2 != null;
+            primerElementoFila1 = primerElementoFila1.getAbajo(), primerElementoFila2 = primerElementoFila2.getAbajo()) {
+            
+            List<Double> filaNumeros = new ArrayList<>();
+            for(Elemento<Double> indiceMat1 = primerElementoFila1, indiceMat2 = primerElementoFila2;
+                indiceMat1 != null || indiceMat2 != null;
+                indiceMat1 = indiceMat1.getDerecha(), indiceMat2 = indiceMat2.getDerecha()) {
+                
+                Double numero = indiceMat1.getElemento() - indiceMat2.getElemento();
                 filaNumeros.add(numero);
             }
             
@@ -284,13 +291,7 @@ public class Matriz<Tipo> implements IMatriz {
      * @return
      */
     public Elemento<Tipo> get(int fila, int columna) {
-        try {
-            if((fila < 0 || fila > this.filas-1) && (columna < 0 || columna > this.columnas-1)) throw new IndiceFueraDeRango("El índice ingresado está fuera de la dimensión de la matriz.");
-        }
-        catch(IndiceFueraDeRango ifdg) {
-            System.out.println(ifdg.getMessage());
-            return null;
-        }
+        if((fila < 0 || fila > this.filas-1) && (columna < 0 || columna > this.columnas-1)) throw new IndiceFueraDeRango("El índice ingresado está fuera de la dimensión de la matriz.");
         
         Elemento<Tipo> elementoBuscado;
         if(this.filas.intValue() == this.columnas.intValue() || this.filas > this.columnas) {
@@ -309,7 +310,7 @@ public class Matriz<Tipo> implements IMatriz {
         this.get(fila, columna).setElemento(elemento);
     }
     
-    private Elemento<Tipo> seleccionFila(int fila) {
+    protected Elemento<Tipo> seleccionFila(int fila) {
         Elemento<Tipo> elementoBuscado = this.primero;
         if(this.filas % 2 == 0) {
             if(this.filas / 2 <= fila)

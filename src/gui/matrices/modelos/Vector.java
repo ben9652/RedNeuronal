@@ -29,14 +29,16 @@ public class Vector<Tipo> extends Matriz<Tipo> {
             this.addRow(t);
     }
     
-    public static Vector<Double> suma(Vector<Double> v1, Vector<Double> v2) {
-        try {
-            if(!v1.filas.equals(v2.filas)) throw new DimensionesIncompatibles(ERROR_SUMA);
-        }
-        catch(DimensionesIncompatibles di) {
-            System.out.println(di.getMessage());
-            return null;
-        }
+    public static Vector<Double> crearVectorDouble(int elementos) {
+        Vector<Double> vector = new Vector();
+        
+        for(int i = 0 ; i < elementos ; i++) vector.addRow(0.0);
+        
+        return vector;
+    }
+    
+    public static Vector<Double> suma(Vector<Double> v1, Vector<Double> v2) throws DimensionesIncompatibles{
+        if(!v1.filas.equals(v2.filas)) throw new DimensionesIncompatibles(ERROR_SUMA);
         
         Vector<Double> vectorSuma = new Vector();
         
@@ -47,6 +49,29 @@ public class Vector<Tipo> extends Matriz<Tipo> {
             vectorSuma.addRow(indiceV1.getElemento() + indiceV2.getElemento());
         
         return vectorSuma;
+    }
+    
+    public static Vector<Double> resta(Vector<Double> v1, Vector<Double> v2) throws DimensionesIncompatibles{
+        if(!v1.filas.equals(v2.filas)) throw new DimensionesIncompatibles(ERROR_SUMA);
+        
+        Vector<Double> vectorSuma = new Vector();
+        
+        Elemento<Double> indiceV1 = v1.primero;
+        Elemento<Double> indiceV2 = v2.primero;
+        
+        for(int i = 0 ; i < v1.size() ; i++, indiceV1 = indiceV1.getAbajo(), indiceV2 = indiceV2.getAbajo())
+            vectorSuma.addRow(indiceV1.getElemento() - indiceV2.getElemento());
+        
+        return vectorSuma;
+    }
+    
+    public static Vector<Double> producto(Double escalar, Vector<Double> vector) {
+        Vector<Double> vectorProducto = new Vector();
+        
+        for(Elemento<Double> indiceVec = vector.primero ; indiceVec != null ; indiceVec = indiceVec.getAbajo())
+            vectorProducto.addRow(escalar * indiceVec.getElemento());
+        
+        return vectorProducto;
     }
     
     public final String addRow(Tipo elemento) {
@@ -91,8 +116,10 @@ public class Vector<Tipo> extends Matriz<Tipo> {
         return lista;
     }
     
-    public Elemento<Tipo> get(int posicion) {
-        return super.get(posicion, 0);
+    public Elemento<Tipo> get(int posicion) throws IndiceFueraDeRango {
+        if(posicion < 0 || posicion > super.filas - 1) throw new IndiceFueraDeRango("El índice ingresado está fuera de la dimensión del vector.");
+        
+        return super.seleccionFila(posicion);
     }
     
     public int size() {

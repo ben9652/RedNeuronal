@@ -13,7 +13,7 @@ import java.util.List;
  * @author Benjamin
  */
 public class Pruebas {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws DimensionesIncompatibles {
         Matriz<Double> matriz = Matriz.crearMatrizDouble(2, 3);
 //        Number[][] a = {
 //            {9, 5, 1},
@@ -61,7 +61,7 @@ public class Pruebas {
 //        System.out.println("\n\nTiempo transcurrido en la suma de matrices: " + elapsedTime);
 //
         Double[] e = {2.0, 5.0, 1.0};
-        Double[] f = {5.0, 6.0, 2.0};
+        Double[] f = {5.0, 6.0, 2.0, 3.0};
         
         Vector<Double> vector1 = new Vector(e);
         Vector<Double> vector2 = new Vector(f);

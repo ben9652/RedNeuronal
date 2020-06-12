@@ -7,6 +7,7 @@ package gui.aprendizaje.modelos;
 
 import gui.interfaces.IBackpropagation;
 import gui.matrices.modelos.Elemento;
+import gui.matrices.modelos.IndiceFueraDeRango;
 import gui.matrices.modelos.Matriz;
 import gui.matrices.modelos.Vector;
 import gui.neuronas.modelos.CapaNeuronas;
@@ -18,82 +19,88 @@ import gui.neuronas.modelos.CapaSalida;
  */
 public class Backpropagation implements IBackpropagation {
     private int iteracion;
-    private Double costo;                           //Este es el error que presenta la red respecto a los resultados deseados
     private Vector<Double> salidaDeseada;
-    private Double learningRate;
     
-    public Backpropagation(Vector<Double> salida, Vector<Double> salidaDeseada, Double learningRate) {
+    //Estas tres variables de instancia serán usadas para no tener que recalcular tantas veces dC_da
+    private Double derivadaCostoRespectoActivacion;
+    private Integer j;
+    private Integer numeroCapa;
+    
+    public Backpropagation() {
         this.iteracion = 0;
-        this.costo = 0.0;
-        this.learningRate = learningRate;
-        this.actualizarCosto(salida, salidaDeseada);
     }
     
     @Override
-    public final void actualizarCosto(Vector<Double> salida, Vector<Double> salidaDeseada) {        
+    public final Double actualizarCosto(Vector<Double> salida, Vector<Double> salidaDeseada, Double costoTotal) { 
+        Double costoRed = 0.0;
         for(int i = 0 ; i < salida.size() ; i++)
-            this.costo += Math.pow(salida.get(i).getElemento() - salidaDeseada.get(i).getElemento(), 2);
+            costoRed += Math.pow(salida.get(i).getElemento() - salidaDeseada.get(i).getElemento(), 2);
         this.iteracion++;
         this.salidaDeseada = salidaDeseada;
+        
+        costoTotal += costoRed;
+        
+        return costoTotal;
     }
     
-    public Double getCosto() {
-        return this.costo;
-    }
-    
-    public int getIteracion() {
+    @Override
+    public int obtenerIteracion() {
         return this.iteracion;
-    }
-    
-    public Double getLearningRate() {
-        return this.learningRate;
     }
 
     @Override
     public Double dC_dw(int j, int k, CapaNeuronas capa) {
-        return  dC_da(j, capa)*
+        return  this.derivadaCostoRespectoActivacion*
                 capa.getFuncionAct().derivada(capa.getSalidaAntesDeActivacion().get(j).getElemento())*
                 capa.getCapaAnterior().getSalida().get(k).getElemento();
     }
 
     @Override
     public Double dC_db(int j, CapaNeuronas capa) {
-        return  dC_da(j, capa)*
+        return  this.derivadaCostoRespectoActivacion*
                 capa.getFuncionAct().derivada(capa.getSalidaAntesDeActivacion().get(j).getElemento());
     }
     
-    private Double dC_da(int neurona, CapaNeuronas capa) {
+    private Double dC_da(int neurona, CapaNeuronas capa) throws IndiceFueraDeRango {
         if(capa instanceof CapaSalida)
             return 2*(capa.getSalida().get(neurona).getElemento() - this.salidaDeseada.get(neurona).getElemento());
         else {
             CapaNeuronas sig = capa.getCapaSiguiente();
             int neuronasSigCapa = sig.getNumeroDeNeuronasEnCapa();
             Double suma = 0.0;
-            for(int j = 0 ; j < neuronasSigCapa ; j++)
-                suma += dC_da(j, sig)*
-                        sig.getFuncionAct().derivada(sig.getSalidaAntesDeActivacion().get(neurona).getElemento())*
-                        sig.getElementoMatrizPesos(j, neurona).getElemento();
+            for(int indice_j = 0 ; indice_j < neuronasSigCapa ; indice_j++) {
+                suma += dC_da(indice_j, sig)*
+                        sig.getFuncionAct().derivada(sig.getSalidaAntesDeActivacion().get(indice_j).getElemento())*
+                        sig.getElementoMatrizPesos(indice_j, neurona);
+            }
             return suma;
         }
     }
     
-    public void actualizarGradiente(Matriz<Double> grad, Matriz<Double> gradNeto, CapaNeuronas capa) {
-        int j, k;
+    @Override
+    public void actualizarParametros(Matriz<Double> matriz, Matriz<Double> matrizSuma, Vector<Double> vector, Vector<Double> vectorSuma, CapaNeuronas capa) {
+        int indice_j, indice_k;
         
-        k = 0;
-        for(Elemento<Double> primerElemGrad = grad.get(0, 0), primerElemGradNeto = gradNeto.get(0, 0);
-            primerElemGrad != null || primerElemGradNeto != null;
-            primerElemGrad = primerElemGrad.getDerecha(), primerElemGradNeto = primerElemGradNeto.getDerecha(), k++) {
+        indice_j = 0;
+        for(Elemento<Double> primerElemMatriz = matriz.get(0,0), primerElemMatrizSuma = matrizSuma.get(0,0),
+            indiceVector = vector.get(0), indiceVectorSuma = vectorSuma.get(0);
+            primerElemMatriz != null;
+            primerElemMatriz = primerElemMatriz.getAbajo(), primerElemMatrizSuma = primerElemMatrizSuma.getAbajo(),
+            indiceVector = indiceVector.getAbajo(), indiceVectorSuma.getAbajo(), indice_j++) {
             
-            j = 0;
-            for(Elemento<Double> indiceGrad = primerElemGrad, indiceGradNeto = primerElemGradNeto;
-                indiceGrad != null || indiceGradNeto != null;
-                indiceGrad = indiceGrad.getAbajo(), indiceGradNeto = indiceGradNeto.getAbajo(), j++) {
+            this.derivadaCostoRespectoActivacion = this.dC_da(indice_j, capa);
+            
+            indiceVectorSuma.setElemento(indiceVectorSuma.getElemento() + this.dC_db(indice_j, capa));
+            indiceVector.setElemento((1.0/this.iteracion) * indiceVectorSuma.getElemento());
+            
+            indice_k = 0;
+            for(Elemento<Double> indiceMatriz = primerElemMatriz, indiceMatrizSuma = primerElemMatrizSuma;
+                indiceMatriz != null;
+                indiceMatriz = indiceMatriz.getDerecha(), indiceMatrizSuma = indiceMatrizSuma.getDerecha(), indice_k++) {
                 
-                indiceGradNeto.setElemento(indiceGradNeto.getElemento() + this.dC_dw(j, k, capa));
-                indiceGrad.setElemento((1/this.iteracion)*indiceGradNeto.getElemento());
+                indiceMatrizSuma.setElemento(indiceMatrizSuma.getElemento() + this.dC_dw(indice_j, indice_k, capa));
+                indiceMatriz.setElemento((1.0/this.iteracion) * indiceMatrizSuma.getElemento());
             }
         }
-            
     }
 }
