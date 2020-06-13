@@ -11,8 +11,8 @@ import gui.aprendizaje.modelos.Backpropagation;
 import gui.interfaces.IBackpropagation;
 import gui.interfaces.IFuncionActivacion;
 import gui.matrices.modelos.DimensionesIncompatibles;
-import gui.matrices.modelos.Matriz;
 import gui.matrices.modelos.Vector;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +30,8 @@ public class RedNeuronal {
     private int numeroSalidas;
     protected Vector<Double> entrada;
     protected Vector<Double> salida;
+    protected Double rendimiento;
+    protected int numeroTests;
     private IBackpropagation bp;
     private Double costoPromedio;
     private Double costoTotal;
@@ -38,8 +40,7 @@ public class RedNeuronal {
                        int numeroSalidas, 
                        int [] numeroNeuronasOcultas, 
                        IFuncionActivacion [] fnActOcultas, 
-                       IFuncionActivacion fnActSalida, 
-                       Double[][][] pesos) {
+                       IFuncionActivacion fnActSalida) {
         this.capasOcultas = new ArrayList<>();
         this.entrada = new Vector();
         this.salida = new Vector();
@@ -60,6 +61,146 @@ public class RedNeuronal {
         this.numeroSalidas = numeroSalidas;
         
         this.bp = new Backpropagation();
+        
+        System.out.println("¡Red Neuronal creada!");
+        this.print();
+        System.out.println("\nEstado inicial de la red:");
+        this.printMatricesPesos();
+    }
+    
+    public RedNeuronal(int numeroEntradas, 
+                       int numeroSalidas, 
+                       int [] numeroNeuronasOcultas, 
+                       IFuncionActivacion [] fnActOcultas, 
+                       IFuncionActivacion fnActSalida,
+                       Double[][][] pesos,
+                       Double[][] biases) throws PesosIncompatiblesConRed, BiasesIncompatiblesConRed {
+        
+        if(pesos.length != numeroNeuronasOcultas.length + 1) 
+            throw new PesosIncompatiblesConRed("Cantidad de matrices no compatible con red.");
+        if(biases.length != numeroNeuronasOcultas.length + 1) 
+            throw new BiasesIncompatiblesConRed("Cantidad de vectores no compatible con red.");
+        
+        for(int i = 0 ; i <= numeroNeuronasOcultas.length ; i++) {            
+            for(int j = 0 ; j < pesos[i].length ; j++) {
+                
+                String errorColumnas = "La matriz de la capa " + (i + 1) + " tiene una cantidad de columnas distinta al número de neuronas de la capa " + i + ".";
+                if(i == 0) {
+                    if(pesos[i][j].length != numeroEntradas)
+                        throw new PesosIncompatiblesConRed(errorColumnas);
+                }
+                else if(pesos[i][j].length != numeroNeuronasOcultas[i-1])
+                    throw new PesosIncompatiblesConRed(errorColumnas);
+                
+                String errorFilas = "La matriz de la capa " + (i + 1) + " tiene una cantidad de filas distinta al número de neuronas que le corresponde.";
+                if(i != numeroNeuronasOcultas.length) {
+                    if(pesos[i].length != numeroNeuronasOcultas[i])
+                        throw new PesosIncompatiblesConRed(errorFilas);
+                }
+                else {
+                    if(pesos[i].length != numeroSalidas)
+                        throw new PesosIncompatiblesConRed(errorFilas);
+                }
+                
+                String errorVector = "El vector de biases de la capa " + (i + 1) + " tiene una dimensión distinta al número de neuronas que le corresponde.";
+                if(i != numeroNeuronasOcultas.length) {
+                    if(biases[i].length != numeroNeuronasOcultas[i])
+                        throw new BiasesIncompatiblesConRed(errorVector);
+                }
+                else {
+                    if(biases[i].length != numeroSalidas)
+                        throw new BiasesIncompatiblesConRed(errorVector);
+                }
+            }
+        }
+        
+        this.capasOcultas = new ArrayList<>();
+        this.entrada = new Vector();
+        this.salida = new Vector();
+        this.costoPromedio = 10.0;
+        this.costoTotal = 0.0;
+        
+        this.numeroEntradas = numeroEntradas;
+        addCapa(new CapaEntrada(numeroEntradas));
+        
+        int i;
+        for(i = 0 ; i < numeroNeuronasOcultas.length ; i++) {
+            int entradas = this.ultimaCapa.getNumeroSalidas();
+            addCapa(new CapaOculta(numeroNeuronasOcultas[i], fnActOcultas[i], entradas, pesos[i], biases[i]));
+            this.capasOcultas.add((CapaOculta) this.ultimaCapa);
+        }
+        
+        int entradas = this.ultimaCapa.getNumeroSalidas();
+        addCapaFinal(new CapaSalida(numeroSalidas, fnActSalida, entradas, pesos[i], biases[i]));
+        this.numeroSalidas = numeroSalidas;
+        
+        this.bp = new Backpropagation();
+        
+        System.out.println("¡Red Neuronal creada!");
+        this.print();
+        System.out.println("\nEstado inicial de la red:");
+        this.printMatricesPesos();
+    }
+    
+    public RedNeuronal(int numeroEntradas, 
+                       int numeroSalidas, 
+                       int [] numeroNeuronasOcultas, 
+                       IFuncionActivacion [] fnActOcultas, 
+                       IFuncionActivacion fnActSalida,
+                       Double[][][] pesos) throws PesosIncompatiblesConRed {
+        
+        if(pesos.length != numeroNeuronasOcultas.length + 1) 
+            throw new PesosIncompatiblesConRed("Cantidad de matrices no compatible con red.");
+        
+        for(int i = 0 ; i <= numeroNeuronasOcultas.length ; i++) {            
+            for(int j = 0 ; j < pesos[i].length ; j++) {
+
+                String errorColumnas = "La matriz de la capa " + (i + 1) + " tiene una cantidad de columnas distinta al número de neuronas de la capa " + i + ".";
+                if(i == 0) {
+                    if(pesos[i][j].length != numeroEntradas)
+                        throw new PesosIncompatiblesConRed(errorColumnas);
+                }
+                else if(pesos[i][j].length != numeroNeuronasOcultas[i-1])
+                        throw new PesosIncompatiblesConRed(errorColumnas);
+
+                String errorFilas = "La matriz de la capa " + i + " tiene una cantidad de filas distinta al número de neuronas que le corresponde.";
+                if(i != numeroNeuronasOcultas.length) {
+                    if(pesos[i].length != numeroNeuronasOcultas[i])
+                        throw new PesosIncompatiblesConRed(errorFilas);
+                }
+                else {
+                    if(pesos[i].length != numeroSalidas)
+                        throw new PesosIncompatiblesConRed(errorFilas);
+                }
+            }
+        }
+        
+        this.capasOcultas = new ArrayList<>();
+        this.entrada = new Vector();
+        this.salida = new Vector();
+        this.costoPromedio = 10.0;
+        this.costoTotal = 0.0;
+        
+        this.numeroEntradas = numeroEntradas;
+        addCapa(new CapaEntrada(numeroEntradas));
+        
+        int i;
+        for(i = 0 ; i < numeroNeuronasOcultas.length ; i++) {
+            int entradas = this.ultimaCapa.getNumeroSalidas();
+            addCapa(new CapaOculta(numeroNeuronasOcultas[i], fnActOcultas[i], entradas, pesos[i]));
+            this.capasOcultas.add((CapaOculta) this.ultimaCapa);
+        }
+        
+        int entradas = this.ultimaCapa.getNumeroSalidas();
+        addCapaFinal(new CapaSalida(numeroSalidas, fnActSalida, entradas, pesos[i]));
+        this.numeroSalidas = numeroSalidas;
+        
+        this.bp = new Backpropagation();
+        
+        System.out.println("¡Red Neuronal creada!");
+        this.print();
+        System.out.println("\nEstado inicial de la red:");
+        this.printMatricesPesos();
     }
     
     private void addCapa(CapaNeuronas capaNueva) {
@@ -84,6 +225,7 @@ public class RedNeuronal {
         this.capaSalida = capaFinal;
         this.ultimaCapa.setNumeroCapa(this.numeroCapasOcultas + 1);
     }
+
     
     /**
      * Se inicializan los datos en la capa de entrada
@@ -126,9 +268,10 @@ public class RedNeuronal {
                 vectorEntrada += "]";
         }
         
+        DecimalFormat df = new DecimalFormat("#.##");
         String vectorSalida = "[";
         for(int i = 0 ; i < this.salida.size() ; i++) {
-            vectorSalida += this.salida.get(i).getElemento();
+            vectorSalida += df.format(this.salida.get(i).getElemento());
             if(i != this.salida.size() - 1)
                 vectorSalida += ", ";
             else
@@ -152,7 +295,7 @@ public class RedNeuronal {
             capa.aprendizaje(this.bp, learningRate);
     }
     
-    public void print(){
+    public final void print(){
         System.out.println("Red Neuronal: "
                 + "\n\tEntradas: " + this.numeroEntradas
                 + "\n\tSalidas: " + this.numeroSalidas
@@ -164,7 +307,7 @@ public class RedNeuronal {
         }
     }
     
-    public void printMatricesPesos() {
+    public final void printMatricesPesos() {
         for(CapaNeuronas capa = this.capaEntrada.getCapaSiguiente() ; capa != null ; capa = capa.getCapaSiguiente()) {
             System.out.println("Pesos capa " + capa.getNumeroCapa() + ":");
             capa.mostrarMatrizPesos();
@@ -192,8 +335,10 @@ public class RedNeuronal {
     /**
      * 
      * @param entrada la entrada a setear
+     * @throws gui.matrices.modelos.DimensionesIncompatibles
      */
-    public void setEntrada(Vector<Double> entrada) {
+    public void setEntrada(Vector<Double> entrada) throws DimensionesIncompatibles {
+        if(entrada.size() != this.numeroEntradas) throw new DimensionesIncompatibles("La entrada propuesta tiene un tamaño distinto al de la entrada de la red.");
         this.entrada = entrada;
     }
 

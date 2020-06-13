@@ -18,9 +18,17 @@ public class CapaOculta extends CapaNeuronas {
         super(numeroNeuronas, iaf, numeroEntradas);
     }
     
-//    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos) {
-//        super(numeroNeuronas, iaf, numeroEntradas, pesos);
-//    }
+    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos, Double[] biases) {
+        super(numeroNeuronas, iaf, numeroEntradas, pesos, biases);
+    }
+    
+    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos) {
+        super(numeroNeuronas, iaf, numeroEntradas, pesos);
+    }
+    
+    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[] biases) {
+        super(numeroNeuronas, iaf, numeroEntradas, biases);
+    }
     
     /**
      *

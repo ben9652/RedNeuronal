@@ -18,9 +18,17 @@ public class CapaSalida extends CapaNeuronas {
         super(numeroNeuronas, iaf, numeroEntradas);
     }
     
-//    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos) {
-//        super(numeroNeuronas, iaf, numeroEntradas, pesos);
-//    }
+    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos, Double[] biases) {
+        super(numeroNeuronas, iaf, numeroEntradas, pesos, biases);
+    }
+    
+    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos) {
+        super(numeroNeuronas, iaf, numeroEntradas, pesos);
+    }
+    
+    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[] biases) {
+        super(numeroNeuronas, iaf, numeroEntradas, biases);
+    }
     
     @Override
     public void calculoSalida(boolean esEntrada) throws CapaSinEntrada, DimensionesIncompatibles {

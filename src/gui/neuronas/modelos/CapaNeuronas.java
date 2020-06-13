@@ -9,7 +9,6 @@ import gui.funciones.modelos.Sigmoidea;
 import gui.interfaces.IBackpropagation;
 import gui.interfaces.IFuncionActivacion;
 import gui.matrices.modelos.DimensionesIncompatibles;
-import gui.matrices.modelos.Elemento;
 import gui.matrices.modelos.Matriz;
 import gui.matrices.modelos.Vector;
 import java.util.List;
@@ -71,24 +70,51 @@ public abstract class CapaNeuronas {
     public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas){
         this.numeroDeNeuronasEnCapa = numeroNeuronas;
         this.matrizPesos = new Matriz();
+        this.biases = new Vector();
         this.funcionAct = iaf;
         this.numeroEntradas = numeroEntradas;
         this.entrada = new Vector();
         this.salida = new Vector();
-        this.biases = new Vector();
         inicializar();
     }
     
-//    public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos){
-//        this.numeroDeNeuronasEnCapa = numeroNeuronas;
-//        this.matrizPesos = new Matriz();
-//        this.funcionAct = iaf;
-//        this.numeroEntradas = numeroEntradas;
-//        this.entrada = new Vector();
-//        this.salida = new Vector();
-//        this.biases = new Vector();
-//        inicializar();
-//    }
+    public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos, Double[] biases){
+        this.numeroDeNeuronasEnCapa = numeroNeuronas;
+        this.matrizPesos = new Matriz(pesos);
+        this.biases = new Vector(biases);
+        this.funcionAct = iaf;
+        this.numeroEntradas = numeroEntradas;
+        this.entrada = new Vector();
+        this.salida = new Vector();
+        
+        this.matrizGradientePesos = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+        this.matrizGradientePesosSuma = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+    
+        this.gradienteBiases = Vector.crearVectorDouble(this.biases.size());
+        this.gradienteBiasesSuma = Vector.crearVectorDouble(this.biases.size());
+    }
+    
+    public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos){
+        this.numeroDeNeuronasEnCapa = numeroNeuronas;
+        this.matrizPesos = new Matriz(pesos);
+        this.biases = new Vector();
+        this.funcionAct = iaf;
+        this.numeroEntradas = numeroEntradas;
+        this.entrada = new Vector();
+        this.salida = new Vector();
+        inicializar(true);
+    }
+    
+    public CapaNeuronas(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[] biases){
+        this.numeroDeNeuronasEnCapa = numeroNeuronas;
+        this.matrizPesos = new Matriz();
+        this.biases = new Vector(biases);
+        this.funcionAct = iaf;
+        this.numeroEntradas = numeroEntradas;
+        this.entrada = new Vector();
+        this.salida = new Vector();
+        inicializar(false);
+    }
     
     public CapaNeuronas(int numeroEntradas){
         this.numeroEntradas = numeroEntradas;
@@ -106,6 +132,8 @@ public abstract class CapaNeuronas {
         for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++) {
             Double[] pesos = new Double[this.numeroEntradas];
             
+            this.biases.addRow((-1.0) * random.nextDouble());
+            
             for(int j = 0 ; j < this.numeroEntradas ; j++)
                 pesos[j] = random.nextDouble();
             
@@ -114,32 +142,33 @@ public abstract class CapaNeuronas {
         
         this.matrizGradientePesos = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
         this.matrizGradientePesosSuma = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
-        
-        Double[] biasesList = new Double[this.numeroDeNeuronasEnCapa];
-        for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++)
-            biasesList[i] = -1.0;
-        
-        this.biases = new Vector(biasesList);
     
         this.gradienteBiases = Vector.crearVectorDouble(this.biases.size());
         this.gradienteBiasesSuma = Vector.crearVectorDouble(this.biases.size());
     }
     
-//    private void inicializar(Double[][] pesos) {
-//        this.matrizPesos = new Matriz(pesos);
-//        
-//        this.matrizGradientePesos = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
-//        this.matrizGradientePesosSuma = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
-//        
-//        Double[] biasesList = new Double[this.numeroDeNeuronasEnCapa];
-//        for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++)
-//            biasesList[i] = -1.0;
-//        
-//        this.biases = new Vector(biasesList);
-//        
-//        this.gradienteBiases = Vector.crearVectorDouble(this.biases.size());
-//        this.gradienteBiasesSuma = Vector.crearVectorDouble(this.biases.size());
-//    }
+    private void inicializar(boolean tienePesosIngresados) {
+        Random random = new Random();
+        
+        for(int i = 0 ; i < this.numeroDeNeuronasEnCapa ; i++) {
+            Double[] pesos = new Double[this.numeroEntradas];
+            
+            if(tienePesosIngresados) 
+                this.biases.addRow((-1.0) * random.nextDouble());
+            else {
+                for(int j = 0 ; j < this.numeroEntradas ; j++)
+                    pesos[j] = random.nextDouble();
+                
+                this.matrizPesos.addRow(pesos);
+            }
+        }
+        
+        this.matrizGradientePesos = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+        this.matrizGradientePesosSuma = Matriz.crearMatrizDouble(this.matrizPesos.getFilas(), this.matrizPesos.getColumnas());
+    
+        this.gradienteBiases = Vector.crearVectorDouble(this.biases.size());
+        this.gradienteBiasesSuma = Vector.crearVectorDouble(this.biases.size());
+    }
     
     protected void calculoSalida(boolean esEntrada) throws CapaSinEntrada, DimensionesIncompatibles {
         if(this.numeroEntradas == 0) throw new CapaSinEntrada("¡Capa sin entradas!");
