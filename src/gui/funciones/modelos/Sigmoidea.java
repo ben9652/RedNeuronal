@@ -14,7 +14,9 @@ import gui.interfaces.IFuncionActivacion;
 public class Sigmoidea implements IFuncionActivacion {
     private double a = 1.0;
     
-    public Sigmoidea(double a){this.a = a;}
+    public Sigmoidea(double a) {
+        this.a = a;
+    }
     
     @Override
     public double calc(double x){

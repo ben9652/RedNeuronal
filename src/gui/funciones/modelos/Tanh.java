@@ -14,7 +14,9 @@ import gui.interfaces.IFuncionActivacion;
 public class Tanh implements IFuncionActivacion {
     private double a = 1.0;
     
-    public Tanh(double a) {this.a = a;}
+    public Tanh(double a) {
+        this.a = a;
+    }
 
     @Override
     public double calc(double x) {

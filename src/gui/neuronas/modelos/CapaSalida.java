@@ -5,8 +5,10 @@
  */
 package gui.neuronas.modelos;
 
+import gui.excepciones.DimensionesIncompatibles;
+import gui.excepciones.NoEsMatriz;
+import gui.excepciones.PesosIncompatiblesConRed;
 import gui.interfaces.IFuncionActivacion;
-import gui.matrices.modelos.DimensionesIncompatibles;
 
 /**
  *
@@ -18,20 +20,20 @@ public class CapaSalida extends CapaNeuronas {
         super(numeroNeuronas, iaf, numeroEntradas);
     }
     
-    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos, Double[] biases) {
+    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, double[][] pesos, double[] biases) {
         super(numeroNeuronas, iaf, numeroEntradas, pesos, biases);
     }
     
-    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos) {
+    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, double[][] pesos) throws PesosIncompatiblesConRed {
         super(numeroNeuronas, iaf, numeroEntradas, pesos);
     }
     
-    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[] biases) {
+    public CapaSalida(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, double[] biases) {
         super(numeroNeuronas, iaf, numeroEntradas, biases);
     }
     
     @Override
-    public void calculoSalida(boolean esEntrada) throws CapaSinEntrada, DimensionesIncompatibles {
+    public void calculoSalida(boolean esEntrada) throws CapaSinEntrada, DimensionesIncompatibles, NoEsMatriz {
         super.calculoSalida(esEntrada);
     }
 }

@@ -5,8 +5,6 @@
  */
 package gui.interfaces;
 
-import gui.matrices.modelos.Matriz;
-import gui.matrices.modelos.Vector;
 import gui.neuronas.modelos.CapaNeuronas;
 
 /**
@@ -15,13 +13,9 @@ import gui.neuronas.modelos.CapaNeuronas;
  */
 public interface IBackpropagation {
 
-    public Double actualizarCosto(Vector<Double> salida, Vector<Double> salidaDeseada, Double costoTotal);
-
-    public Double dC_dw(int j, int k, CapaNeuronas capa);
-
-    public Double dC_db(int j, CapaNeuronas capa);
+    public Double actualizarCosto(double[] salida, double[] salidaDeseada, double costoTotal);
     
     public int obtenerIteracion();
     
-    public void actualizarParametros(Matriz<Double> matriz, Matriz<Double> matrizSuma, Vector<Double> vector, Vector<Double> vectorSuma, CapaNeuronas capa);
+    public double[][][] actualizarParametros(double[][] matriz, double[][] matrizSuma, double[] vector, double[] vectorSuma, CapaNeuronas capa);
 }

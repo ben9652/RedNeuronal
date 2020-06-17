@@ -5,8 +5,6 @@
  */
 package gui.imagenes.modelos;
 
-import gui.matrices.modelos.Elemento;
-import gui.matrices.modelos.Matriz;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
@@ -30,7 +28,7 @@ public class Imagen {
     private InputStream input;
     private ImageInputStream imageInput;
     private BufferedImage imageL;
-    private Matriz<Integer[]> colores;
+    private Integer[][][] colores;
     
     private static final String SEPARADOR_COLUMNA = ",\t";
     
@@ -41,7 +39,7 @@ public class Imagen {
             this.input = new FileInputStream(localizacion_imagen);
             this.imageInput = ImageIO.createImageInputStream(this.input);
             this.imageL = ImageIO.read(this.imageInput);
-            this.colores = new Matriz<>();
+            this.colores = new Integer[this.verAlto()][this.verAncho()][3];
         }
         catch(FileNotFoundException fnf) {
             System.out.println("No se encontró el archivo.");
@@ -53,15 +51,13 @@ public class Imagen {
         for(int x = 0 ; x < verAlto() ; x++) {
             List<Integer[]> pixeles = new ArrayList<>();
             for(int y = 0 ; y < verAncho() ; y++) {
-                System.out.println(this.imageL.getRGB(x, y));
                 Color c = new Color(this.imageL.getRGB(x, y));
                 Integer[] pixel = new Integer[3];
                 pixel[0] = c.getRed();
                 pixel[1] = c.getGreen();
                 pixel[2] = c.getBlue();
-                pixeles.add(pixel);
+                this.colores[x][y] = pixel;
             }
-            this.colores.addRow(pixeles);
         }
         
         this.escribirColores();
@@ -75,46 +71,41 @@ public class Imagen {
         return this.imageL.getWidth();
     }
     
-    public Matriz<Integer[]> getMatriz() {
+    public Integer[][][] getMatriz() {
         return this.colores;
     }
     
     public boolean esEscalaDeGrises() {
-        boolean esEscalaDeGrises = true;
         for(int i = 0 ; i < this.verAlto() ; i++) {
-            Elemento<Integer[]> pixel = this.colores.get(i, 0);
-            for(int j = 0 ; j < this.verAncho() ; j++, pixel = pixel.getDerecha()) {
-                Integer[] p = pixel.getElemento();
-                if(!Objects.equals(p[0], p[1]) || !Objects.equals(p[1], p[2])) return false;
+            for(int j = 0 ; j < this.verAncho() ; j++) {
+                Integer[] pixel = this.colores[i][j];
+                if(!Objects.equals(pixel[0], pixel[1]) || !Objects.equals(pixel[1], pixel[2])) return false;
             }
         }
         
-        return esEscalaDeGrises;
+        return true;
     }
     
     private void escribirColores() {
-        boolean esEscalaDeGrises = this.esEscalaDeGrises();
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(ARCHIVO))) {
-            Matriz<Integer[]> matriz = this.colores;
-            if(!esEscalaDeGrises) {
-                for(int j = 0 ; j < this.verAlto() ; j++) {
-                    Elemento<Integer[]> pixel = matriz.get(0, j);
-                    for(int i = 0 ; i < this.verAncho() ; i++, pixel = pixel.getAbajo()) {
-                        bw.write("[" + pixel.getElemento()[0].toString() + "," + pixel.getElemento()[1].toString() + "," + pixel.getElemento()[2].toString() + "]" + (pixel.getAbajo() != null? SEPARADOR_COLUMNA : ""));
-                        if(pixel.getAbajo() == null) {bw.newLine(); bw.newLine();}
+            try {
+                if(!this.esEscalaDeGrises()) {
+                    for(int j = 0 ; j < this.verAlto() ; j++) {
+                        for(int i = 0 ; i < this.verAncho() ; i++)
+                            bw.write("[" + this.colores[i][j][0].toString() + "," + this.colores[i][j][1].toString() + "," + this.colores[i][j][2].toString() + "]" + (this.colores[i][j][i+1] != null? SEPARADOR_COLUMNA : ""));
+                    }
+                }
+                else {
+                    for(int j = 0 ; j < this.verAlto() ; j++) {
+                        for(int i= 0 ; i < this.verAncho() ; i++) {
+                            String gris = this.colores[i][j][0].toString();
+                            bw.write(gris + (this.colores[i+1][j] != null? SEPARADOR_COLUMNA : ""));
+                        }
                     }
                 }
             }
-            else {
-                for(int j = 0 ; j < this.verAlto() ; j++) {
-                    Elemento<Integer[]> pixel = matriz.get(0, j);
-                    for(int i= 0 ; i < this.verAncho() ; i++, pixel = pixel.getAbajo()) {
-                        String gris = pixel.getElemento()[0].toString();
-                        String escritura = gris + (pixel.getAbajo() != null? SEPARADOR_COLUMNA : "");
-                        bw.write(escritura);
-                        if(pixel.getAbajo() == null) {bw.newLine(); bw.newLine();}
-                    }
-                }
+            catch(ArrayIndexOutOfBoundsException aioobe) {
+                bw.newLine(); bw.newLine();
             }
         }
         catch(IOException ioe) {

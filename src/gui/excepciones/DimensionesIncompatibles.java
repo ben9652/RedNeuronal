@@ -3,15 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gui.neuronas.modelos;
+package gui.excepciones;
 
 /**
  *
  * @author Benjamin
  */
-public class BiasesIncompatiblesConRed extends Exception {
+public class DimensionesIncompatibles extends Exception {
     
-    public BiasesIncompatiblesConRed(String msg) {
+    public DimensionesIncompatibles() {
+        
+    }
+    
+    public DimensionesIncompatibles(String msg) {
         super(msg);
     }
     

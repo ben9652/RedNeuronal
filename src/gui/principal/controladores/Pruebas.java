@@ -5,13 +5,13 @@
  */
 package gui.principal.controladores;
 
+import gui.excepciones.BiasesIncompatiblesConRed;
+import gui.excepciones.DimensionesIncompatibles;
+import gui.excepciones.NoEsMatriz;
+import gui.neuronas.modelos.CapaSinEntrada;
+import gui.excepciones.PesosIncompatiblesConRed;
 import gui.funciones.modelos.Sigmoidea;
 import gui.interfaces.IFuncionActivacion;
-import gui.matrices.modelos.DimensionesIncompatibles;
-import gui.matrices.modelos.Vector;
-import gui.neuronas.modelos.BiasesIncompatiblesConRed;
-import gui.neuronas.modelos.CapaSinEntrada;
-import gui.neuronas.modelos.PesosIncompatiblesConRed;
 import gui.neuronas.modelos.RedNeuronal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,12 +24,35 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author Benjamin
  */
 public class Pruebas {
-    public static void main(String[] args) throws CapaSinEntrada, DimensionesIncompatibles, PesosIncompatiblesConRed, BiasesIncompatiblesConRed {
-        Double a = 0.10224;
-        Double b = 0.1;
-        
-        Boolean bool = areEqualDouble(a, b, 3);
-        
+    public static void main(String[] args) throws CapaSinEntrada, PesosIncompatiblesConRed, BiasesIncompatiblesConRed, DimensionesIncompatibles, NoEsMatriz, NoEsMatriz {
+//        double[] pesos = {0.5, 0.5};
+//        double bias = 0.5;
+//        IFuncionActivacion fnAct = new Sigmoidea(1.0);
+//        Perceptron perceptron = new Perceptron(2, fnAct, pesos, bias);
+//        
+//        double[][] entradasPosibles = {
+//            {1.0, 1.0},
+//            {1.0, 0.0},
+//            {0.0, 1.0}
+//        };
+//        
+//        perceptron.setEntrada(entradasPosibles[0]);
+//        
+//        perceptron.calculoSalida();
+//        perceptron.aprendizaje(1.0);
+//        perceptron.printPesosYBiases();
+//        
+//        perceptron.setEntrada(entradasPosibles[1]);
+//        
+//        perceptron.calculoSalida();
+//        perceptron.aprendizaje(1.0);
+//        perceptron.printPesosYBiases();
+//        
+//        perceptron.setEntrada(entradasPosibles[2]);
+//        
+//        perceptron.calculoSalida();
+//        perceptron.aprendizaje(0.0);
+//        perceptron.printPesosYBiases();
         long startTime = System.currentTimeMillis();
         Random r = new Random();
         r.setSeed(0);
@@ -38,33 +61,105 @@ public class Pruebas {
         
         int numeroDeEntradas = 2;
         int numeroDeSalidas = 1;
-        int[] numeroDeNeuronasOcultas = {3};
+        int[] numeroDeNeuronasOcultas = {2};
         IFuncionActivacion[] fnActOcultas = {new Sigmoidea(1.0)};
         Sigmoidea fnActSalida = new Sigmoidea(1.0);
         System.out.println("Creando Red Neuronal...");
-
-        Double[][][] pesos = {
-            {
-                {-157.66313191200098, 91.29279331349758},
-                {-19.769050366789994, 43.93294782793237},
-                {-140.99507649260585, 123.48340575834389}
-            },
-            {
-                {74.4526860129564, -21.387733693878122, -131.53584105822563}
-            },
-        };
         
-        Double[][] biases = {
-            {33.49553799944952, 33.61173070777371, 34.21010065750269},
-            
-            {91.11082474328853}
-        };
+//Parámetros iniciales
+//Pesos capa 1:
+//0.8277383946257432		0.9073268411711306		
+//
+//0.49564764403967176		0.3083391088006223		
+//
+//
+//Biases capa 1:
+//-0.23788506515643681
+//
+//-0.92749191451472
+//
+//
+//Pesos capa 2:
+//0.5749745714348665		0.6487540169012812		
+//
+//
+//Biases capa 2:
+//-0.7023377689295509
+
+//Parámetros después de entrenamiento
+//Pesos capa 1:
+//14.128577346310468		13.967831701173981		
+//
+//5.30678956821172		5.2389912066089925		
+//
+//
+//Biases capa 1:
+//-1.1367892829997928
+//
+//-10.06889335160328
+//
+//
+//Pesos capa 2:
+//12.518590065775136		-16.52955624152671		
+//
+//
+//Biases capa 2:
+//-6.64906841114244
+
+    double[][][] pesos = {
+        {
+            {14.128577346310468, 13.967831701173981},
+            {5.30678956821172, 5.2389912066089925},
+        },
+        {
+            {12.518590065775136, -16.52955624152671}
+        }
+    };
+    
+    double[][] biases = {
+        {-1.1367892829997928, -10.06889335160328},
+        {-6.64906841114244}
+    };
+
+
+//        double[][][] pesos = {
+//            {
+//                {20.0, 20.0},
+//                {-20.0, -20.0}
+//            },
+//            {
+//                {20, 20}
+//            }
+//        };
+//        
+//        double[][] biases = {
+//            {-10, 30},
+//            {-30}
+//        };
+
+//        double[][][] pesos = {
+//            {
+//                {19.60905031229541, 20.682557306402018},
+//                {15.600930109027608, 15.491248438823199}
+//            },
+//            {
+//                {19.567578183111493, -32.8559338041145}
+//            }
+//        };
+//        
+//        double[][] biases = {
+//            {-3.3138589960405045,
+//             -23.029654308253185},
+//            
+//            {-7.354682072023129}
+//        };
         
         RedNeuronal redN = new RedNeuronal(numeroDeEntradas, numeroDeSalidas, numeroDeNeuronasOcultas, fnActOcultas, fnActSalida, pesos, biases);
         
-        aprenderXOR(redN);
+//        aprenderXOR(redN);
         
-        
+        redN.determinarTolerancia(0.001);
+        testearRedXOR(redN);
         
         System.out.println("Tiempo transcurrido en el programa: " + (System.currentTimeMillis() - startTime) + " milisegundos");
     }
@@ -91,9 +186,9 @@ public class Pruebas {
         return valorAbsoluto <= potencia;
     }
     
-    public static void aprenderXOR(RedNeuronal red) throws CapaSinEntrada, DimensionesIncompatibles {
+    public static void aprenderXOR(RedNeuronal red) throws CapaSinEntrada, DimensionesIncompatibles, NoEsMatriz {
         
-        Double[][] entradasPosibles = {
+        double[][] entradasPosibles = {
             {0.0,0.0},
             {0.0,1.0},
             {1.0,0.0},
@@ -102,9 +197,8 @@ public class Pruebas {
         
         while(true) {
             int x = numeroRandom(0,4);
-            Double[] entradaNeuronal = entradasPosibles[x];
-            red.setEntrada(new Vector(entradaNeuronal));
-            Double[] salidaDeseada = new Double[1];
+            double[] entradaNeuronal = entradasPosibles[x];
+            double[] salidaDeseada = new double[1];
             switch(x) {
                 case 0:
                     salidaDeseada[0] = 0.0;
@@ -119,26 +213,45 @@ public class Pruebas {
                     salidaDeseada[0] = 0.0;
                     break;
             }
-            red.calculoActivaciones();
-            System.out.println(red.calculoCosto(new Vector(salidaDeseada)));
             
             if(red.getCosto() < 0.001) break;
             
-            red.aprendizaje(0.1);
+            System.out.println(red.aprendizaje(entradaNeuronal, salidaDeseada, 0.1, 0.05));
+            
             System.out.println("");
             red.printMatricesPesos();
         }
     }
     
-    public static void testearRedXOR(RedNeuronal red) {
+    public static void testearRedXOR(RedNeuronal red) throws DimensionesIncompatibles, CapaSinEntrada, NoEsMatriz {
         
-        Double[][] entradasPosibles = {
+        double[][] entradasPosibles = {
             {0.0,0.0},
             {0.0,1.0},
             {1.0,0.0},
             {1.0,1.0}
         };
         
-        
+        while(true) {
+            int x = numeroRandom(0,4);
+            double[] entradaNeuronal = entradasPosibles[x];
+            double[] salidaDeseada = new double[1];
+            switch(x) {
+                case 0:
+                    salidaDeseada[0] = 0.0;
+                    break;
+                case 1:
+                    salidaDeseada[0] = 1.0;
+                    break;
+                case 2:
+                    salidaDeseada[0] = 1.0;
+                    break;
+                case 3:
+                    salidaDeseada[0] = 0.0;
+                    break;
+            }
+            
+            System.out.println(red.test(entradaNeuronal, salidaDeseada));
+        }
     }
 }

@@ -3,19 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gui.matrices.modelos;
+package gui.excepciones;
 
 /**
  *
  * @author Benjamin
  */
-public class IndiceFueraDeRango extends IndexOutOfBoundsException {
+public class PesosIncompatiblesConRed extends Exception {
     
-    public IndiceFueraDeRango() {
-        
-    }
-    
-    public IndiceFueraDeRango(String msg) {
+    public PesosIncompatiblesConRed(String msg) {
         super(msg);
     }
     

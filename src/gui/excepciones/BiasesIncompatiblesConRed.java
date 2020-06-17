@@ -3,19 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gui.matrices.modelos;
+package gui.excepciones;
 
 /**
  *
  * @author Benjamin
  */
-public class DimensionesIncompatibles extends Exception {
+public class BiasesIncompatiblesConRed extends Exception {
     
-    public DimensionesIncompatibles() {
-        
-    }
-    
-    public DimensionesIncompatibles(String msg) {
+    public BiasesIncompatiblesConRed(String msg) {
         super(msg);
     }
     

@@ -5,9 +5,7 @@
  */
 package gui.imagenes.modelos;
 
-import gui.matrices.modelos.Matriz;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
 
 /**
  *
@@ -15,22 +13,22 @@ import java.util.List;
  */
 public class Pruebas {
     public static void main(String[] args) {
-        Matriz<Integer> matriz = new Matriz<>();
-        
-        List<Integer> numeros = new ArrayList<>();
-        numeros.add(2);
-        numeros.add(4);
-        numeros.add(5);
-        
-        matriz.addRow(numeros);
-        numeros.clear();
-        
-        numeros.add(8);
-        numeros.add(10);
-        numeros.add(11);
-        
-        matriz.addRow(numeros);
-        
-        Imagen digito = new Imagen("mnist/trainingSet/0/img_1.jpg");
+        for(int i = 0, renombre = 0 ; i < 42000 ; i++) {
+            String nombre = "mnist/trainingSet/9/";
+            File imagen = new File(nombre + "img_" + i + ".jpg");
+            if(imagen.renameTo(new File(nombre + renombre + ".jpg"))) {
+                renombre++;
+                System.out.println("El archivo fue renombrado correctamente.");
+            }
+            else
+                System.out.println("El renombrado no se ha podido realizar.");
+        }
+//        String cadena = "hola";
+//        cadena = cadena.substring(0, cadena.length() - 1);
+//        File imagen = new File("mnist/trainingSet/0/img_1.jpg");
+//        boolean nombradoCorrecto = imagen.renameTo(new File("mnist/trainingSet/0/0.jpg"));
+//        if(nombradoCorrecto) System.out.println("El archivo fue nombrado correctamente.");
+//        else System.out.println("El renombrado no se ha podido realizar.");
+//        Imagen digito = new Imagen("mnist/trainingSet/0/img_1.jpg");
     }
 }

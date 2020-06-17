@@ -6,7 +6,6 @@
 package gui.neuronas.modelos;
 
 import gui.interfaces.IFuncionActivacion;
-import gui.matrices.modelos.DimensionesIncompatibles;
 
 /**
  *
@@ -18,26 +17,15 @@ public class CapaOculta extends CapaNeuronas {
         super(numeroNeuronas, iaf, numeroEntradas);
     }
     
-    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos, Double[] biases) {
+    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, double[][] pesos, double[] biases) {
         super(numeroNeuronas, iaf, numeroEntradas, pesos, biases);
     }
     
-    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[][] pesos) {
+    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, double[][] pesos) {
         super(numeroNeuronas, iaf, numeroEntradas, pesos);
     }
     
-    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, Double[] biases) {
+    public CapaOculta(int numeroNeuronas, IFuncionActivacion iaf, int numeroEntradas, double[] biases) {
         super(numeroNeuronas, iaf, numeroEntradas, biases);
-    }
-    
-    /**
-     *
-     * @param esEntrada
-     * @throws gui.neuronas.modelos.CapaSinEntrada
-     * @throws gui.matrices.modelos.DimensionesIncompatibles
-     */
-    @Override
-    public void calculoSalida(boolean esEntrada) throws CapaSinEntrada, DimensionesIncompatibles {
-        super.calculoSalida(esEntrada);
     }
 }

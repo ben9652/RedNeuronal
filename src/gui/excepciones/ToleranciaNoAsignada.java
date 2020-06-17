@@ -3,15 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package gui.neuronas.modelos;
+package gui.excepciones;
 
 /**
  *
  * @author Benjamin
  */
-public class PesosIncompatiblesConRed extends Exception {
+public class ToleranciaNoAsignada extends Exception {
     
-    public PesosIncompatiblesConRed(String msg) {
+    public ToleranciaNoAsignada() {
+        
+    }
+    
+    public ToleranciaNoAsignada(String msg) {
         super(msg);
     }
     

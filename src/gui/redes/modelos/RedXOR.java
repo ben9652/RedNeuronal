@@ -6,11 +6,11 @@
 package gui.redes.modelos;
 
 import gui.interfaces.IFuncionActivacion;
-import gui.matrices.modelos.DimensionesIncompatibles;
-import gui.matrices.modelos.Vector;
-import gui.neuronas.modelos.BiasesIncompatiblesConRed;
+import gui.excepciones.BiasesIncompatiblesConRed;
+import gui.excepciones.DimensionesIncompatibles;
+import gui.excepciones.NoEsMatriz;
 import gui.neuronas.modelos.CapaSinEntrada;
-import gui.neuronas.modelos.PesosIncompatiblesConRed;
+import gui.excepciones.PesosIncompatiblesConRed;
 import gui.neuronas.modelos.RedNeuronal;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,11 +20,11 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class RedXOR extends RedNeuronal {
     
-    public RedXOR(int numeroEntradas, int[] numeroNeuronasOcultas, IFuncionActivacion[] fnActOcultas, IFuncionActivacion fnActSalida, Double[][][] pesos, Double[][] biases) throws PesosIncompatiblesConRed, BiasesIncompatiblesConRed {
+    public RedXOR(int numeroEntradas, int[] numeroNeuronasOcultas, IFuncionActivacion[] fnActOcultas, IFuncionActivacion fnActSalida, double[][][] pesos, double[][] biases) throws PesosIncompatiblesConRed, BiasesIncompatiblesConRed {
         super(numeroEntradas, 1, numeroNeuronasOcultas, fnActOcultas, fnActSalida, pesos, biases);
     }
     
-    public RedXOR(int numeroEntradas, int[] numeroNeuronasOcultas, IFuncionActivacion[] fnActOcultas, IFuncionActivacion fnActSalida, Double[][][] pesos) throws PesosIncompatiblesConRed {
+    public RedXOR(int numeroEntradas, int[] numeroNeuronasOcultas, IFuncionActivacion[] fnActOcultas, IFuncionActivacion fnActSalida, double[][][] pesos) throws PesosIncompatiblesConRed {
         super(numeroEntradas, 1, numeroNeuronasOcultas, fnActOcultas, fnActSalida, pesos);
     }
     
@@ -32,13 +32,13 @@ public class RedXOR extends RedNeuronal {
         super(numeroEntradas, 1, numeroNeuronasOcultas, fnActOcultas, fnActSalida);
     }
     
-    public void entrenamiento(Double[][] entradasPosibles, Double tolerancia, Double factorAprendizaje) throws DimensionesIncompatibles, CapaSinEntrada {
+    public void entrenamiento(double[][] entradasPosibles, double tolerancia, double factorAprendizaje) throws CapaSinEntrada, DimensionesIncompatibles, NoEsMatriz {
         
         while(true) {
             int x = numeroRandom(0, entradasPosibles.length - 1);
-            Double[] entradaNeuronal = entradasPosibles[x];
-            this.setEntrada(new Vector(entradaNeuronal));
-            Double[] salidaDeseada = new Double[1];
+            double[] entradaNeuronal = entradasPosibles[x];
+            this.setEntrada(entradaNeuronal);
+            double[] salidaDeseada = new double[1];
             switch(x) {
                 case 0:
                     salidaDeseada[0] = 0.0;
@@ -54,7 +54,7 @@ public class RedXOR extends RedNeuronal {
                     break;
             }
             this.calculoActivaciones();
-            System.out.println(this.calculoCosto(new Vector(salidaDeseada)));
+            System.out.println(this.calculoCosto(salidaDeseada));
             
             if(this.getCosto() < 0.001) break;
             
@@ -63,14 +63,14 @@ public class RedXOR extends RedNeuronal {
             this.printMatricesPesos();
         }
     }
-        
+    
     /**
      *
      * @param min
      * @param max
      * @return
      */
-    public static Integer numeroRandom(Integer min, Integer max) {
+    private static Integer numeroRandom(Integer min, Integer max) {
         return ThreadLocalRandom.current().nextInt(min, max);
     }
 }
