@@ -5,26 +5,33 @@
  */
 package gui.redes.modelos;
 
-import gui.excepciones.BiasesIncompatiblesConRed;
 import gui.excepciones.DimensionesIncompatibles;
 import gui.excepciones.NoEsMatriz;
-import gui.excepciones.PesosIncompatiblesConRed;
 import gui.interfaces.Arreglos;
 import gui.interfaces.IFuncionActivacion;
-import gui.neuronas.modelos.CapaSalida;
-import gui.neuronas.modelos.CapaSinEntrada;
+import java.util.Random;
 
 /**
  *
  * @author Benjamin
  */
-public final class Perceptron extends CapaSalida {
+public final class Perceptron {
+    private int numeroEntradas;
+    private double[] entrada;
+    private double salida;
+    private double[][] matrizPesos;
+    private double bias;
+    private IFuncionActivacion fnAct;
     private double[] intersecciones;
     private int iteraciones = 0;
 
     public Perceptron(int numeroEntradas, IFuncionActivacion fnActSalida) {
-        super(1, fnActSalida, numeroEntradas);
+        this.entrada = new double[numeroEntradas];
         this.intersecciones = new double[numeroEntradas];
+        this.fnAct = fnActSalida;
+        this.numeroEntradas = numeroEntradas;
+        this.matrizPesos = new double[1][numeroEntradas];
+        this.inicializar();
         
         System.out.println("¡Perceptrón creado!");
         this.print();
@@ -32,9 +39,13 @@ public final class Perceptron extends CapaSalida {
         this.printPesosYBiases();
     }
     
-    public Perceptron(int numeroEntradas, IFuncionActivacion fnActSalida, double[] pesos) throws PesosIncompatiblesConRed {
-        super(1, fnActSalida, numeroEntradas, conversionVectorPesos(pesos));
+    public Perceptron(int numeroEntradas, IFuncionActivacion fnActSalida, double[] pesos) {
+        this.entrada = new double[numeroEntradas];
         this.intersecciones = new double[numeroEntradas];
+        this.fnAct = fnActSalida;
+        this.numeroEntradas = numeroEntradas;
+        this.matrizPesos = conversionVectorPesos(pesos);
+        this.inicializar(true);
         
         System.out.println("¡Perceptrón creado!");
         this.print();
@@ -42,14 +53,37 @@ public final class Perceptron extends CapaSalida {
         this.printPesosYBiases();
     }
     
-    public Perceptron(int numeroEntradas, IFuncionActivacion fnActSalida, double[] pesos, double bias) throws PesosIncompatiblesConRed, BiasesIncompatiblesConRed {
-        super(1, fnActSalida, numeroEntradas, conversionVectorPesos(pesos), conversionBias(bias));
+    public Perceptron(int numeroEntradas, IFuncionActivacion fnActSalida, double[] pesos, double bias) {
+        this.entrada = new double[numeroEntradas];
         this.intersecciones = new double[numeroEntradas];
+        this.fnAct = fnActSalida;
+        this.numeroEntradas = numeroEntradas;
+        this.matrizPesos = conversionVectorPesos(pesos);
+        this.bias = bias;
         
         System.out.println("¡Perceptrón creado!");
         this.print();
         System.out.println("Estado inicial del perceptrón:");
         this.printPesosYBiases();
+    }
+    
+    private void inicializar() {
+        Random random = new Random();
+        
+        this.bias = (-1.0) * random.nextDouble();
+        
+        for(int i = 0 ; i < this.numeroEntradas ; i++)
+            this.matrizPesos[0][i] = random.nextDouble();
+    }
+    
+    private void inicializar(boolean tienePesosIngresados) {
+        Random random = new Random();
+        
+        if(tienePesosIngresados) this.bias = (-1.0) * random.nextDouble();
+        else {
+            for(int i = 0 ; i < this.numeroEntradas ; i++)
+                this.matrizPesos[0][i] = random.nextDouble();
+        }
     }
     
     private static double[][] conversionVectorPesos(double[] pesos) {
@@ -70,19 +104,21 @@ public final class Perceptron extends CapaSalida {
     }
     
     
-    public void calculoSalida() throws CapaSinEntrada, DimensionesIncompatibles, NoEsMatriz {
-        super.calculoSalida(false);
+    public void calculoSalida() throws DimensionesIncompatibles, NoEsMatriz {
+        double[] sumaPonderada = Arreglos.producto(this.matrizPesos, this.entrada);
+        double salidaAntesDeActivacion = sumaPonderada[0] + this.bias;
+        this.salida = this.fnAct.calc(salidaAntesDeActivacion);
     }
     
     public void aprendizaje(double salidaDeseada) {
-        double error = salidaDeseada - super.salida[0];
+        double error = salidaDeseada - this.salida;
         
-        for(int i = 0 ; i < super.matrizPesos[0].length ; i++) {
-            super.matrizPesos[0][i] += error * super.entrada[i];
-            this.intersecciones[i] = - (super.biases[0] / super.matrizPesos[0][i]);
+        for(int i = 0 ; i < this.matrizPesos[0].length ; i++) {
+            this.matrizPesos[0][i] += error * this.entrada[i];
+            this.intersecciones[i] = - (this.bias / this.matrizPesos[0][i]);
         }
         
-        super.biases[0] += error;
+        this.bias += error;
         this.iteraciones++;
         
         String vectorEntrada = "[";
@@ -94,38 +130,36 @@ public final class Perceptron extends CapaSalida {
                 vectorEntrada += "]";
         }
         
-        System.out.println("\n\t\t--------------------O--------------------\n\nÉpoca: " + this.iteraciones + "\nEntrada: " + vectorEntrada + "\nSalida esperada: " + salidaDeseada + "\nSalida: " + super.salida[0] + "\nCosto: " + error);
+        System.out.println("\n\t\t--------------------O--------------------\n\nÉpoca: " + this.iteraciones + "\nEntrada: " + vectorEntrada + "\nSalida esperada: " + salidaDeseada + "\nSalida: " + this.salida + "\nCosto: " + error);
     }
     
-    @Override
     public void setEntrada(double[] entrada) {
-        super.setEntrada(entrada);
+        this.entrada = entrada;
     }
     
     public void print() {
-        System.out.println("\n\tNúmero de entradas: " + super.numeroEntradas);
+        System.out.println("\n\tNúmero de entradas: " + this.numeroEntradas);
     }
     
     public void printPesosYBiases() {
-        System.out.println("Pesos última capa" + ":");
-        Arreglos.print(super.matrizPesos);
+        System.out.println("Pesos: ");
+        Arreglos.print(this.matrizPesos);
 
-        System.out.println("\nBiases última capa" + ":");
-        System.out.println(super.biases[0]);
+        System.out.println("\nBias: ");
+        System.out.println(this.bias);
 
         System.out.println("");
     }
     
-    @Override
     public double[] getEntrada() {
-        return super.entrada;
+        return this.entrada;
     }
     
     public double[] getPesos() {
-        return super.matrizPesos[0];
+        return this.matrizPesos[0];
     }
     
     public double getBias() {
-        return super.biases[0];
+        return this.bias;
     }
 }

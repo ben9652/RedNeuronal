@@ -57,8 +57,6 @@ public class Pruebas {
         Random r = new Random();
         r.setSeed(0);
         
-        List<Double> n = new ArrayList<>();
-        
         int numeroDeEntradas = 2;
         int numeroDeSalidas = 1;
         int[] numeroDeNeuronasOcultas = {2};
@@ -106,21 +104,6 @@ public class Pruebas {
 //Biases capa 2:
 //-6.64906841114244
 
-    double[][][] pesos = {
-        {
-            {14.128577346310468, 13.967831701173981},
-            {5.30678956821172, 5.2389912066089925},
-        },
-        {
-            {12.518590065775136, -16.52955624152671}
-        }
-    };
-    
-    double[][] biases = {
-        {-1.1367892829997928, -10.06889335160328},
-        {-6.64906841114244}
-    };
-
 
 //        double[][][] pesos = {
 //            {
@@ -137,29 +120,29 @@ public class Pruebas {
 //            {-30}
 //        };
 
-//        double[][][] pesos = {
-//            {
-//                {19.60905031229541, 20.682557306402018},
-//                {15.600930109027608, 15.491248438823199}
-//            },
-//            {
-//                {19.567578183111493, -32.8559338041145}
-//            }
-//        };
-//        
-//        double[][] biases = {
-//            {-3.3138589960405045,
-//             -23.029654308253185},
-//            
-//            {-7.354682072023129}
-//        };
+        double[][][] pesos = {
+            {
+                {19.60905031229541, 20.682557306402018},
+                {15.600930109027608, 15.491248438823199}
+            },
+            {
+                {19.567578183111493, -32.8559338041145}
+            }
+        };
         
-        RedNeuronal redN = new RedNeuronal(numeroDeEntradas, numeroDeSalidas, numeroDeNeuronasOcultas, fnActOcultas, fnActSalida, pesos, biases);
+        double[][] biases = {
+            {-3.3138589960405045,
+             -23.029654308253185},
+            
+            {-7.354682072023129}
+        };
         
-//        aprenderXOR(redN);
+        RedNeuronal redN = new RedNeuronal(numeroDeEntradas, numeroDeSalidas, numeroDeNeuronasOcultas, fnActOcultas, fnActSalida);
         
-        redN.determinarTolerancia(0.001);
-        testearRedXOR(redN);
+        aprenderXOR(redN, 0.001);
+        
+//        redN.determinarTolerancia(0.001);
+//        testearRedXOR(redN);
         
         System.out.println("Tiempo transcurrido en el programa: " + (System.currentTimeMillis() - startTime) + " milisegundos");
     }
@@ -186,7 +169,7 @@ public class Pruebas {
         return valorAbsoluto <= potencia;
     }
     
-    public static void aprenderXOR(RedNeuronal red) throws CapaSinEntrada, DimensionesIncompatibles, NoEsMatriz {
+    public static void aprenderXOR(RedNeuronal red, double tolerancia) throws CapaSinEntrada, DimensionesIncompatibles, NoEsMatriz {
         
         double[][] entradasPosibles = {
             {0.0,0.0},
@@ -214,9 +197,9 @@ public class Pruebas {
                     break;
             }
             
-            if(red.getCosto() < 0.001) break;
+            if(red.getCosto() < tolerancia) break;
             
-            System.out.println(red.aprendizaje(entradaNeuronal, salidaDeseada, 0.1, 0.05));
+            System.out.println(red.aprendizaje(entradaNeuronal, salidaDeseada, 0.5, 0.1));
             
             System.out.println("");
             red.printMatricesPesos();

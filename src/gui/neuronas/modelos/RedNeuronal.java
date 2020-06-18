@@ -307,7 +307,7 @@ public class RedNeuronal {
         for(int i = 0 ; i < this.salida.length ; i++)
             costoIndividual += Math.pow(this.salida[i] - salidaDeseada[i], 2);
         
-        return "\n\t\t--------------------O--------------------\n\nÉpoca: " + this.bp.obtenerIteracion() + "\nEntrada: " + vectorEntrada + "\nSalida esperada: " + vectorSalidaDeseada + "\nSalida: " + vectorSalida + "\nCosto: " + this.costoPromedio + "\nCosto individual: " + costoIndividual;
+        return "\n\t\t-------------------- O --------------------\n\nÉpoca: " + this.bp.obtenerIteracion() + "\nEntrada: " + vectorEntrada + "\nSalida esperada: " + vectorSalidaDeseada + "\nSalida: " + vectorSalida + "\nCosto: " + this.costoPromedio + "\nCosto individual: " + costoIndividual;
     }
     
     public String aprendizaje(double[] entrada, double[] salidaDeseada, double learningRate, double momento) throws DimensionesIncompatibles, NoEsMatriz, CapaSinEntrada {
