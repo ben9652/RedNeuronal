@@ -13,6 +13,7 @@ import gui.excepciones.PesosIncompatiblesConRed;
 import gui.funciones.modelos.Sigmoidea;
 import gui.interfaces.IFuncionActivacion;
 import gui.neuronas.modelos.RedNeuronal;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author Benjamin
  */
 public class Pruebas {
-    public static void main(String[] args) throws CapaSinEntrada, PesosIncompatiblesConRed, BiasesIncompatiblesConRed, DimensionesIncompatibles, NoEsMatriz, NoEsMatriz {
+    public static void main(String[] args) throws CapaSinEntrada, PesosIncompatiblesConRed, BiasesIncompatiblesConRed, DimensionesIncompatibles, NoEsMatriz, NoEsMatriz, IOException {
 //        double[] pesos = {0.5, 0.5};
 //        double bias = 0.5;
 //        IFuncionActivacion fnAct = new Sigmoidea(1.0);
@@ -137,7 +138,7 @@ public class Pruebas {
             {-7.354682072023129}
         };
         
-        RedNeuronal redN = new RedNeuronal(numeroDeEntradas, numeroDeSalidas, numeroDeNeuronasOcultas, fnActOcultas, fnActSalida);
+        RedNeuronal redN = new RedNeuronal(numeroDeEntradas, numeroDeSalidas, numeroDeNeuronasOcultas, fnActOcultas, fnActSalida, true);
         
         aprenderXOR(redN, 0.001);
         

@@ -5,12 +5,14 @@
  */
 package gui.neuronas.modelos;
 
+import gui.datos.modelos.GestorParametros;
 import gui.excepciones.DimensionesIncompatibles;
 import gui.excepciones.NoEsMatriz;
 import gui.funciones.modelos.Lineal;
 import gui.interfaces.Arreglos;
 import gui.interfaces.IBackpropagation;
 import gui.interfaces.IFuncionActivacion;
+import java.util.List;
 import java.util.Random;
 
 /**

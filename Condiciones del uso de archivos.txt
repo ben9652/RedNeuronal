@@ -1,0 +1,2 @@
+Al crear una capa, le diré al constructor si debería usar un archivo existente con pesos y biases en él, o no. En caso que no se lea un archivo, se creará el mismo
+con pesos y biases aleatorios.

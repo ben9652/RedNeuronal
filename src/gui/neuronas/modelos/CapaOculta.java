@@ -6,6 +6,7 @@
 package gui.neuronas.modelos;
 
 import gui.interfaces.IFuncionActivacion;
+import java.util.List;
 
 /**
  *

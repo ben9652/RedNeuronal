@@ -10,10 +10,12 @@ package gui.neuronas.modelos;
 import gui.excepciones.BiasesIncompatiblesConRed;
 import gui.excepciones.PesosIncompatiblesConRed;
 import gui.aprendizaje.modelos.Backpropagation;
+import gui.datos.modelos.GestorParametros;
 import gui.excepciones.DimensionesIncompatibles;
 import gui.excepciones.NoEsMatriz;
 import gui.interfaces.IBackpropagation;
 import gui.interfaces.IFuncionActivacion;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,8 @@ public class RedNeuronal {
     protected double costoPromedio;
     protected double costoTotal;
     
+    protected GestorParametros gp;
+    
     public RedNeuronal(int numeroEntradas, 
                        int numeroSalidas, 
                        int [] numeroNeuronasOcultas, 
@@ -55,20 +59,70 @@ public class RedNeuronal {
         this.numeroEntradas = numeroEntradas;
         addCapa(new CapaEntrada(numeroEntradas));
         
-        try {
-            for(int i = 0 ; i < numeroNeuronasOcultas.length ; i++) {
-                int entradas = this.ultimaCapa.getNumeroSalidas();
-                addCapa(new CapaOculta(numeroNeuronasOcultas[i], fnActOcultas[i], entradas));
-                this.capasOcultas.add((CapaOculta) this.ultimaCapa);
-            }
-        }
-        catch(NullPointerException npe) {
-            
+        for(int i = 0 ; i < numeroNeuronasOcultas.length ; i++) {
+            int entradas = this.ultimaCapa.getNumeroSalidas();
+            addCapa(new CapaOculta(numeroNeuronasOcultas[i], fnActOcultas[i], entradas));
+            this.capasOcultas.add((CapaOculta) this.ultimaCapa);
         }
         
         int entradas = this.ultimaCapa.getNumeroSalidas();
         addCapaFinal(new CapaSalida(numeroSalidas, fnActSalida, entradas));
         this.numeroSalidas = numeroSalidas;
+        
+        this.bp = new Backpropagation();
+        
+        System.out.println("¡Red Neuronal creada!");
+        this.print();
+        System.out.println("\nEstado inicial de la red:");
+        this.printMatricesPesos();
+    }
+    
+    public RedNeuronal(int numeroEntradas,
+                       int numeroSalidas,
+                       int[] numeroNeuronasOcultas,
+                       IFuncionActivacion[] fnActOcultas,
+                       IFuncionActivacion fnActSalida,
+                       boolean pesos_y_biases_inicializados) throws IOException {
+        
+        this.capasOcultas = new ArrayList<>();
+        this.entrada = new double[numeroEntradas];
+        this.salida = new double[numeroSalidas];
+        this.costoPromedio = 10.0;
+        this.numeroTests = 0;
+        this.testsExitosos = 0;
+        
+        this.numeroEntradas = numeroEntradas;
+        addCapa(new CapaEntrada(numeroEntradas));
+        
+        this.gp = new GestorParametros(this.getClass().getSimpleName(), this.capaEntrada);
+        
+        List<double[][]> matricesPesos = new ArrayList<>(numeroNeuronasOcultas.length + 1);
+        List<double[]> vectoresBiases = new ArrayList<>(numeroNeuronasOcultas.length + 1);
+        
+        if(!pesos_y_biases_inicializados)
+            this.gp.leerArchivo(matricesPesos, vectoresBiases);
+        
+        int i;
+        for(i = 0 ; i < numeroNeuronasOcultas.length ; i++) {
+            int entradas = this.ultimaCapa.getNumeroSalidas();
+            if(pesos_y_biases_inicializados)
+                addCapa(new CapaOculta(numeroNeuronasOcultas[i], fnActOcultas[i], entradas));
+            else
+                addCapa(new CapaOculta(numeroNeuronasOcultas[i], fnActOcultas[i], entradas, matricesPesos.get(i), vectoresBiases.get(i)));
+            this.capasOcultas.add((CapaOculta) this.ultimaCapa);
+        }
+        
+        int entradas = this.ultimaCapa.getNumeroSalidas();
+        if(pesos_y_biases_inicializados)
+            addCapaFinal(new CapaSalida(numeroSalidas, fnActSalida, entradas));
+        else
+            addCapaFinal(new CapaSalida(numeroSalidas, fnActSalida, entradas, matricesPesos.get(i), vectoresBiases.get(i)));
+        this.numeroSalidas = numeroSalidas;
+        
+        if(pesos_y_biases_inicializados) {
+            this.gp.escribirArchivo();
+            this.gp.escribirArchivo(this.getClass().getSimpleName() + " - Pesos y biases (datos iniciales).txt");
+        }
         
         this.bp = new Backpropagation();
         
@@ -318,6 +372,8 @@ public class RedNeuronal {
         
         for(CapaNeuronas capa = this.capaSalida ; !(capa instanceof CapaEntrada) ; capa = capa.getCapaAnterior())
             capa.aprendizaje(this.bp, learningRate, momento);
+        
+        this.gp.escribirArchivo();
         
         return datos_entrenamiento;
     }

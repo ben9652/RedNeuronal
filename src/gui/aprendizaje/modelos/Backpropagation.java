@@ -33,7 +33,7 @@ public class Backpropagation implements IBackpropagation {
         this.iteracion++;
         this.salidaDeseada = salidaDeseada;
         
-        costoTotal += costoIteracion;
+        costoTotal += (1.0/salida.length) * costoIteracion;
         
         return costoTotal;
     }
@@ -44,19 +44,19 @@ public class Backpropagation implements IBackpropagation {
     }
     
     private Double dC_dw(int j, int k, CapaNeuronas capa) {
-        return  this.derivadaCostoRespectoActivacion*
-                capa.getFuncionAct().derivada(capa.getSalidaAntesDeActivacion()[j])*
+        return  this.derivadaCostoRespectoActivacion *
+                capa.getFuncionAct().derivada(capa.getSalidaAntesDeActivacion()[j]) *
                 capa.getCapaAnterior().getSalida()[k];
     }
     
     private Double dC_db(int j, CapaNeuronas capa) {
-        return  this.derivadaCostoRespectoActivacion*
+        return  this.derivadaCostoRespectoActivacion *
                 capa.getFuncionAct().derivada(capa.getSalidaAntesDeActivacion()[j]);
     }
     
     private Double dC_da(int neurona, CapaNeuronas capa) throws IndiceFueraDeRango {
         if(capa instanceof CapaSalida)
-            return 2*(capa.getSalida()[neurona] - this.salidaDeseada[neurona]);
+            return (1.0/capa.getNumeroDeNeuronasEnCapa()) * 2 * (capa.getSalida()[neurona] - this.salidaDeseada[neurona]);
         else {
             CapaNeuronas sig = capa.getCapaSiguiente();
             int neuronasSigCapa = sig.getNumeroDeNeuronasEnCapa();
